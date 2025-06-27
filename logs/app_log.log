@@ -1,0 +1,52 @@
+2025-06-27 11:30:18,798 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:30:18,921 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:30:39,435 - ERROR - Cannot download file because: Incomplete download for file yellow_tripdata_2020-01.parquet, expected 93562858, got 93562858
+2025-06-27 11:30:41,609 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:30:42,171 - ERROR - Cannot download file because: Incomplete download for file yellow_tripdata_2020-02.parquet, expected 92134881, got 92134881
+2025-06-27 11:30:44,404 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:30:58,410 - ERROR - Cannot download file because: Incomplete download for file yellow_tripdata_2020-01.parquet, expected 93562858, got 93562858
+2025-06-27 11:31:00,577 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:31:03,187 - ERROR - Cannot download file because: Incomplete download for file yellow_tripdata_2020-02.parquet, expected 92134881, got 92134881
+2025-06-27 11:31:05,399 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:31:21,918 - ERROR - Cannot download file because: Incomplete download for file yellow_tripdata_2020-01.parquet, expected 93562858, got 93562858
+2025-06-27 11:31:21,918 - ERROR - Failed to download yellow_tripdata_2020-01.parquet
+2025-06-27 11:31:23,039 - ERROR - Cannot download file because: Incomplete download for file yellow_tripdata_2020-02.parquet, expected 92134881, got 92134881
+2025-06-27 11:31:23,040 - ERROR - Failed to download yellow_tripdata_2020-02.parquet
+2025-06-27 11:47:41,055 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:47:41,056 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:48:12,589 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:48:12,590 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-01.parquet'
+2025-06-27 11:48:12,591 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:48:12,591 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:48:15,071 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:48:15,072 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-01.parquet'
+2025-06-27 11:48:15,115 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:48:15,116 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:48:17,567 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:48:17,568 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-01.parquet'
+2025-06-27 11:48:17,569 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: Failed to download after all attempts
+2025-06-27 11:48:17,645 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:48:17,645 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:48:17,646 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: Failed to download after all attempts
+2025-06-27 11:48:55,269 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:48:55,270 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-01.parquet'
+2025-06-27 11:48:55,280 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:48:55,281 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:48:57,753 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:48:57,753 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-01.parquet'
+2025-06-27 11:48:57,846 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:48:57,847 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:49:00,248 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-27 11:49:00,249 - ERROR - Cannot download file yellow_tripdata_2020-01.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-01.parquet'
+2025-06-27 11:49:00,249 - ERROR - Failed to download yellow_tripdata_2020-01.parquet after all attempts
+2025-06-27 11:49:00,356 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:49:00,357 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:49:00,358 - ERROR - Failed to download yellow_tripdata_2020-02.parquet after all attempts
+2025-06-27 11:52:02,414 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:52:02,415 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:53:32,635 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:53:32,636 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:53:54,912 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:53:54,913 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
+2025-06-27 11:54:18,726 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-27 11:54:18,726 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: [Errno 2] No such file or directory: 'data/2020zx/yellow_tripdata_2020-02.parquet'
