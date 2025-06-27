@@ -53,15 +53,17 @@ async def main(current_year, end_year):
     urls = []
     retry_times = 2
     while current_year < end_year:
-        create_directory(str(current_year))
+        dir_path = os.path.join("downloaded_files", str(current_year))
+        create_directory(dir_path)
         month = 1
-        while month < 13:
+        while month < 3:
             month_str = month_to_string(month)
             base_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
             urls.append(base_url)
             month += 1
         current_year += 1
         break
+    
     async with aiohttp.ClientSession() as session:
         tasks = [download(session, url, retry_times) for url in urls]
         await asyncio.gather(*tasks)
