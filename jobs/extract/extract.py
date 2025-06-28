@@ -3,12 +3,13 @@ import aiohttp #Use this instead of requests because it is non-blocking
 from pathlib import Path
 from utils.logger import logger
 from datetime import datetime
-from zoneinfo import ZoneInfo  # For Python 3.9+
-
+import pytz
+from collections import defaultdict
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
+tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
-def log_failed_download(filename, error, csv_writer):
-    formatted_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime('%Y-%m-%d %H:%M:%S')
+def log_failed_download(filename, error, csv_writer):    
+    formatted_time = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S')
     csv_writer.writerow([filename, error, formatted_time])
     logger.error(f'Cannot download file {filename} because: {error}')
     
@@ -25,6 +26,7 @@ async def download(session, dir_path, download_url, retry_time, error_file):
     filename = download_url[last_dash + 1:]
     for attemp in range(retry_time + 1):
         try:
+            #Download bytes and write to a file
             async with session.get(download_url, ssl=False) as res:
                 if res.status == 200:
                     logger.info(f"Writing data to {filename}")
@@ -38,7 +40,7 @@ async def download(session, dir_path, download_url, retry_time, error_file):
                             return
                         else:
                             log_failed_download(filename, 'Incomplete download for file', error_file)
-                            file_path.unlink()
+                    file_path.unlink()
         except Exception as e:
             log_failed_download(filename, str(e), error_file)
         if attemp < retry_time:
@@ -56,7 +58,7 @@ def convert_month_to_string(month):
 
 async def extract(current_year, end_year, csv_writer, downloaded_files):
     urls = []
-    retry_times = 2
+    retry_times = 0
     while current_year < end_year:
         dir_path = Path("data") / str(current_year)
         if not Path(dir_path).exists():
