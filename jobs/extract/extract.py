@@ -1,28 +1,26 @@
 import asyncio 
 import aiohttp #Use this instead of requests because it is non-blocking
-import os
+from pathlib import Path
 from utils.logger import logger
-import json
-base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
+from datetime import datetime
+from zoneinfo import ZoneInfo  # For Python 3.9+
 
+# base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 
-def log_failed_download(filename, error):
+def log_failed_download(filename, error, csv_writer):
+    formatted_time = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh")).strftime('%Y-%m-%d %H:%M:%S')
+    csv_writer.writerow([filename, error, formatted_time])
     logger.error(f'Cannot download file {filename} because: {error}')
-    data = []
-    with open('logs/failed_download.txt', 'r+') as f:
-        new_data = {'filename': filename, 'error': error}
-        data = json.load(f)
-        data.append(new_data)
-        json.dump(data, f)
-        
+    
 def check_download_complete(total_bytes, res, filename):
     content_length = res.headers.get("Content-Length")
+    return False
     if content_length and total_bytes != int(content_length):
         return False
     logger.info(f"Finished download {filename}")
     return True
         
-async def download(session, dir_path, download_url, retry_time):
+async def download(session, dir_path, download_url, retry_time, error_file):
     last_dash = download_url.rfind("/")
     filename = download_url[last_dash + 1:]
     for attemp in range(retry_time + 1):
@@ -30,7 +28,8 @@ async def download(session, dir_path, download_url, retry_time):
             async with session.get(download_url, ssl=False) as res:
                 if res.status == 200:
                     logger.info(f"Writing data to {filename}")
-                    with open(os.path.join(dir_path + 'zx', filename), "wb") as f:
+                    file_path = Path(dir_path) / filename
+                    with open(file_path, "wb") as f:
                         total_bytes = 0
                         async for chunk in res.content.iter_chunked(1024):
                             f.write(chunk)
@@ -38,19 +37,15 @@ async def download(session, dir_path, download_url, retry_time):
                         if check_download_complete(total_bytes, res, filename):
                             return
                         else:
-                            log_failed_download(filename, 'Incomplete download for file')
+                            log_failed_download(filename, 'Incomplete download for file', error_file)
+                            file_path.unlink()
         except Exception as e:
-            log_failed_download(filename, str(e))
+            log_failed_download(filename, str(e), error_file)
         if attemp < retry_time:
             await asyncio.sleep(2)
         else:
             logger.error(f'Failed to download {filename} after all attempts')
             return
-
-#Make dir to store downloaded data, make dir based on year
-def create_directory(dir_name):
-    if not os.path.exists(dir_name):
-        os.mkdir(dir_name)
 
 def convert_month_to_string(month):
     if month < 10:
@@ -59,21 +54,27 @@ def convert_month_to_string(month):
         month = str(month)
     return month
 
-async def extract(current_year, end_year):
+async def extract(current_year, end_year, csv_writer, downloaded_files):
     urls = []
     retry_times = 2
     while current_year < end_year:
-        dir_path = os.path.join("data", str(current_year))
-        create_directory(dir_path)
+        dir_path = Path("data") / str(current_year)
+        if not Path(dir_path).exists():
+            Path(dir_path).mkdir(parents=True)
         month = 1
         while month < 3:
             month_str = convert_month_to_string(month)
-            base_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
-            urls.append((dir_path , base_url))
+            download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
+            last_dash = download_url.rfind("/")
+            filename = download_url[last_dash + 1:]
+
+            if filename not in downloaded_files:
+                print(f"Downloading {filename} {download_url}")
+                urls.append((dir_path , download_url))
             month += 1
         current_year += 1
     
     async with aiohttp.ClientSession() as session:
-        tasks = [download(session, dir_path, url, retry_times) for dir_path, url in urls]
+        tasks = [download(session, dir_path, url, retry_times, csv_writer) for dir_path, url in urls]
         await asyncio.gather(*tasks)
 
