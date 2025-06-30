@@ -49,3 +49,25 @@
 2025-06-28 20:31:54,728 - INFO - Writing data to yellow_tripdata_2020-02.parquet
 2025-06-28 20:32:13,309 - ERROR - Cannot download file yellow_tripdata_2020-02.parquet because: Incomplete download for file
 2025-06-28 20:32:13,333 - ERROR - Failed to download yellow_tripdata_2020-02.parquet after all attempts
+2025-06-30 08:59:40,672 - INFO - Writing data to yellow_tripdata_2020-09.parquet
+2025-06-30 08:59:40,688 - INFO - Writing data to yellow_tripdata_2020-10.parquet
+2025-06-30 08:59:40,702 - INFO - Writing data to yellow_tripdata_2020-03.parquet
+2025-06-30 08:59:40,741 - INFO - Writing data to yellow_tripdata_2020-08.parquet
+2025-06-30 08:59:40,758 - INFO - Writing data to yellow_tripdata_2020-06.parquet
+2025-06-30 08:59:40,778 - INFO - Writing data to yellow_tripdata_2020-07.parquet
+2025-06-30 08:59:40,781 - INFO - Writing data to yellow_tripdata_2020-04.parquet
+2025-06-30 08:59:40,920 - INFO - Writing data to yellow_tripdata_2020-11.parquet
+2025-06-30 08:59:40,971 - INFO - Writing data to yellow_tripdata_2020-02.parquet
+2025-06-30 08:59:41,269 - INFO - Writing data to yellow_tripdata_2020-01.parquet
+2025-06-30 08:59:41,274 - INFO - Writing data to yellow_tripdata_2020-05.parquet
+2025-06-30 08:59:47,239 - INFO - Finished download yellow_tripdata_2020-05.parquet
+2025-06-30 08:59:48,725 - INFO - Finished download yellow_tripdata_2020-07.parquet
+2025-06-30 08:59:52,726 - INFO - Finished download yellow_tripdata_2020-04.parquet
+2025-06-30 08:59:55,442 - INFO - Finished download yellow_tripdata_2020-09.parquet
+2025-06-30 08:59:55,765 - INFO - Finished download yellow_tripdata_2020-03.parquet
+2025-06-30 08:59:56,263 - INFO - Finished download yellow_tripdata_2020-06.parquet
+2025-06-30 08:59:57,814 - INFO - Finished download yellow_tripdata_2020-08.parquet
+2025-06-30 09:00:04,617 - INFO - Finished download yellow_tripdata_2020-11.parquet
+2025-06-30 09:00:19,689 - INFO - Finished download yellow_tripdata_2020-10.parquet
+2025-06-30 09:00:19,759 - INFO - Finished download yellow_tripdata_2020-02.parquet
+2025-06-30 09:00:21,649 - INFO - Finished download yellow_tripdata_2020-01.parquet

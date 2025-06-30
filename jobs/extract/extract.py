@@ -15,7 +15,6 @@ def log_failed_download(filename, error, csv_writer):
     
 def check_download_complete(total_bytes, res, filename):
     content_length = res.headers.get("Content-Length")
-    return False
     if content_length and total_bytes != int(content_length):
         return False
     logger.info(f"Finished download {filename}")
@@ -64,7 +63,7 @@ async def extract(current_year, end_year, csv_writer, downloaded_files):
         if not Path(dir_path).exists():
             Path(dir_path).mkdir(parents=True)
         month = 1
-        while month < 3:
+        while month < 12:
             month_str = convert_month_to_string(month)
             download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
             last_dash = download_url.rfind("/")

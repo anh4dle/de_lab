@@ -4,4 +4,4 @@
 
 ## Todo:
 
-- Figure out tomorrow
+- Write docker file for MinIO and Airflow
