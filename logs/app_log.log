@@ -71,3 +71,8 @@
 2025-06-30 09:00:19,689 - INFO - Finished download yellow_tripdata_2020-10.parquet
 2025-06-30 09:00:19,759 - INFO - Finished download yellow_tripdata_2020-02.parquet
 2025-06-30 09:00:21,649 - INFO - Finished download yellow_tripdata_2020-01.parquet
+2025-06-30 17:00:06,789 - ERROR - 'DataFrame' object has no attribute 'append'
+2025-06-30 17:06:06,426 - ERROR - If using all scalar values, you must pass an index
+2025-06-30 17:22:27,393 - INFO - File already uploaded
+2025-06-30 17:22:36,711 - INFO - File already uploaded
+2025-06-30 17:23:42,596 - INFO - File already uploaded

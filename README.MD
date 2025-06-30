@@ -4,4 +4,4 @@
 
 ## Todo:
 
-- Write docker file for MinIO and Airflow
+- Write to 
