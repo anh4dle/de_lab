@@ -2,3 +2,6 @@ env
 data
 .env
 logs
+airflow/data
+airflow/logs
+airflow/plugins

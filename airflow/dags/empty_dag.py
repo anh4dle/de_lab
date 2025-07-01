@@ -11,5 +11,4 @@ with DAG(
     task = EmptyOperator(task_id="task")
 
     task2 = EmptyOperator(task_id="task2")
-    task >> task2    
-    
+    task >> task2

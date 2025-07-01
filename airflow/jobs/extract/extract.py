@@ -1,5 +1,5 @@
-import asyncio 
-import aiohttp #Use this instead of requests because it is non-blocking
+import asyncio
+import aiohttp  # Use this instead of requests because it is non-blocking
 from pathlib import Path
 from utils.logger import logger
 from datetime import datetime
@@ -8,24 +8,27 @@ from collections import defaultdict
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
-def log_failed_download(filename, error, csv_writer):    
+
+def log_failed_download(filename, error, csv_writer):
     formatted_time = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S')
     csv_writer.writerow([filename, error, formatted_time])
     logger.error(f'Cannot download file {filename} because: {error}')
-    
+
+
 def check_download_complete(total_bytes, res, filename):
     content_length = res.headers.get("Content-Length")
     if content_length and total_bytes != int(content_length):
         return False
     logger.info(f"Finished download {filename}")
     return True
-        
+
+
 async def download(session, dir_path, download_url, retry_time, error_file):
     last_dash = download_url.rfind("/")
     filename = download_url[last_dash + 1:]
     for attemp in range(retry_time + 1):
         try:
-            #Download bytes and write to a file
+            # Download bytes and write to a file
             async with session.get(download_url, ssl=False) as res:
                 if res.status == 200:
                     logger.info(f"Writing data to {filename}")
@@ -38,7 +41,8 @@ async def download(session, dir_path, download_url, retry_time, error_file):
                         if check_download_complete(total_bytes, res, filename):
                             return
                         else:
-                            log_failed_download(filename, 'Incomplete download for file', error_file)
+                            log_failed_download(
+                                filename, 'Incomplete download for file', error_file)
                     file_path.unlink()
         except Exception as e:
             log_failed_download(filename, str(e), error_file)
@@ -48,12 +52,14 @@ async def download(session, dir_path, download_url, retry_time, error_file):
             logger.error(f'Failed to download {filename} after all attempts')
             return
 
+
 def convert_month_to_string(month):
     if month < 10:
         month = '0' + str(month)
     else:
         month = str(month)
     return month
+
 
 async def extract(current_year, end_year, csv_writer, downloaded_files):
     urls = []
@@ -71,11 +77,11 @@ async def extract(current_year, end_year, csv_writer, downloaded_files):
 
             if filename not in downloaded_files:
                 print(f"Downloading {filename} {download_url}")
-                urls.append((dir_path , download_url))
+                urls.append((dir_path, download_url))
             month += 1
         current_year += 1
-    
-    async with aiohttp.ClientSession() as session:
-        tasks = [download(session, dir_path, url, retry_times, csv_writer) for dir_path, url in urls]
-        await asyncio.gather(*tasks)
 
+    async with aiohttp.ClientSession() as session:
+        tasks = [download(session, dir_path, url, retry_times, csv_writer)
+                 for dir_path, url in urls]
+        await asyncio.gather(*tasks)

@@ -9,7 +9,7 @@ load_dotenv()  # Loads from .env in current directory by default
 
 def get_minio_client(minio_access: str, minio_pass: str):
     client = Minio(
-        "localhost:9000",
+        "minio:9000",
         access_key=minio_access,
         secret_key=minio_pass,
         secure=False,
@@ -51,22 +51,3 @@ def upload_file_to_minio(client, bucket_name: str, object_name: str, file_path: 
         df_upload_log.to_csv('logs/upload_log.csv', index=False)
     except Exception as e:
         logger.error('Error from upload file to minio', e)
-
-
-minio_access = os.getenv("MINIO_ROOT_USER")
-minio_pass = os.getenv("MINIO_ROOT_PASSWORD")
-
-client = get_minio_client(minio_access, minio_pass)
-bucket_name = 'taxidata'
-object_name = '2020/yellow_tripdata_2020-01.parquet'
-file_path = 'data/2020/yellow_tripdata_2020-01.parquet'
-if Path('logs/upload_log.csv').exists():
-    df_upload_log = pd.read_csv('logs/upload_log.csv')
-else:
-    df_upload_log = pd.DataFrame(columns=['File', 'Time'])
-
-upload_file_to_minio(client, bucket_name, object_name,
-                     file_path, df_upload_log)
-df_upload_log.to_csv('logs/upload_log.csv', index=False)
-# go through all the files in data directory and upload to minio
-# Pass 
