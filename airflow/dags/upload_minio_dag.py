@@ -38,30 +38,30 @@ def task_flow():
         return client
 
     @task
-    def get_path_and_obj_names(airflow_home):
-
+    def get_obj_names(airflow_home):
         file_dict = get_all_files_in_dir(airflow_home)
-        file_paths = [Path(airflow_home) / k / v for k, v in file_dict.items()]
         object_names = [k / v for k,
                         v in file_dict.items()]
-        return file_paths, object_names
+        return object_names
 
     @task
     def upload():
-        airflow_home = Variable.get("AIRFLOW_HOME")
         minio_client = get_minio()
+        airflow_home = Variable.get("AIRFLOW_HOME")
         bucket_name = Variable.get("MINIO_BUCKET")
 
-        file_paths, object_names = get_path_and_obj_names(airflow_home)
+        object_names = get_obj_names(airflow_home)
 
         if Path('logs/upload_log.csv').exists():
             df_upload_log = pd.read_csv('logs/upload_log.csv')
         else:
             df_upload_log = pd.DataFrame(columns=['File', 'Time'])
 
-        for file_path, object_name in zip(file_paths, object_names):
-            upload_file_to_minio(minio_client, bucket_name, object_name,
-                                 file_path, df_upload_log)
+        for k, v in object_names:
+            object_name = k / v
+            file_path = Path(airflow_home) / object_name
+            upload_file_to_minio(minio_client, bucket_name,
+                                 object_name, file_path, df_upload_log)
 
         df_upload_log.to_csv('logs/upload_log.csv', index=False)
 

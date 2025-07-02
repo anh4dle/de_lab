@@ -14,6 +14,3 @@ def get_all_files_in_dir(dir_path):
                     else:
                         path_dictionary[dir.name] = [file.name]
     return path_dictionary
-
-
-get_all_files_in_dir("airflow/data")

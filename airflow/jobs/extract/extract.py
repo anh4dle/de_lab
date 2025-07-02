@@ -4,7 +4,7 @@ from pathlib import Path
 from utils.logger import logger
 from datetime import datetime
 import pytz
-from collections import defaultdict
+
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
@@ -69,7 +69,7 @@ async def extract(current_year, end_year, csv_writer, downloaded_files):
         if not Path(dir_path).exists():
             Path(dir_path).mkdir(parents=True)
         month = 1
-        while month < 12:
+        while month < 3:
             month_str = convert_month_to_string(month)
             download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
             last_dash = download_url.rfind("/")
