@@ -1,6 +1,6 @@
 <property>
   <name>javax.jdo.option.ConnectionURL</name>
-  <value>jdbc:postgresql://postgres:5432/hive_metastore</value>
+  <value>jdbc:postgresql://postgres:5432/hive_metastore_db</value>
 </property>
 <property>
   <name>javax.jdo.option.ConnectionUserName</name>

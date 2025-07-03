@@ -1,5 +1,5 @@
 -- Create Hive Metastore database
-CREATE DATABASE hive_metastore;
+CREATE DATABASE hive_metastore_db;
 
 -- (Optional) create a separate user for Hive if desired:
 -- CREATE USER hive_user WITH PASSWORD 'hive_password';
