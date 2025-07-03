@@ -44,6 +44,21 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 
 services:
+  hive-metastore:
+    image: apache/hive:4.0.0 # Or another suitable image
+    ports:
+      - "9083:9083"
+    environment:
+      SERVICE_NAME: metastore
+      HIVE_METASTORE_DRIVER: org.postgresql.Driver
+      HIVE_METASTORE_JDBC_URL: jdbc:postgresql://metastore_db:5432/metastore
+      HIVE_METASTORE_USER: airflow
+      HIVE_METASTORE_PASSWORD: airflow
+      HIVE_METASTORE_WAREHOUSE_DIR: s3://datalake/
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_PATH_STYLE_ACCESS: "true"
   minio:
     image: minio/minio:latest
     ports:
@@ -68,13 +83,13 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
+      - ./init-postgres:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
       retries: 5
       start_period: 5s
     restart: always
-
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
     # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
@@ -88,7 +103,13 @@ services:
       retries: 50
       start_period: 30s
     restart: always
-
+  trino:
+    ports:
+      - "8089:8080" #Map hostport 8443 to container port
+    image: "trinodb/trino:475"
+    volumes:
+      - ./trino/etc:/usr/lib/trino/etc:ro
+      - ./trino/catalog:/etc/trino/catalog
   airflow-apiserver:
     <<: *airflow-common
     command: api-server
