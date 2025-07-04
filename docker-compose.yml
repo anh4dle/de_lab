@@ -109,7 +109,7 @@ services:
   trino:
     ports:
       - "8089:8080" #Map hostport 8443 to container port
-    image: "trinodb/trino:475"
+    image: "trinodb/trino:470"
     volumes:
       - ./trino/etc:/usr/lib/trino/etc:ro
       - ./trino/catalog:/etc/trino/catalog
