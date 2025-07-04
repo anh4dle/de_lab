@@ -1,4 +1,5 @@
-CREATE TABLE iceberg.default.taxitable (
+--Create iceberg table for raw layer
+CREATE TABLE iceberg.default.taxi_raw (
     VendorID INT,
     tpep_pickup_datetime TIMESTAMP,
     passenger_count INT,
@@ -19,8 +20,6 @@ CREATE TABLE iceberg.default.taxitable (
     airport_fee DOUBLE
 )
 WITH (
-	external_location = 's3://taxidata/',
+	location = 's3://lake/raw/',
     format = 'PARQUET'
 );
-
-

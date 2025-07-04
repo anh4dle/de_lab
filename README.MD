@@ -2,7 +2,10 @@
 - Data lake project
 - Ingest yellow taxi data from https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 - Hive metastore is like a dictionary we use to look up iceberg table which store in minio, trino is the query engine.
+- ETL workflow: Source → Iceberg Raw Table → Spark Job → Iceberg Staging Table
 
 ## Todo:
 
--
+- Change file path to include date time for upload
+- Create iceberg table for all bucket first
+- Use spark to append data from source to iceberg

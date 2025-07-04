@@ -1,5 +1,5 @@
 {
     "MINIO_ROOT_USER":"minioadmin",
     "MINIO_ROOT_PASSWORD":"minioadmin",
-    "MINIO_BUCKET" : "taxidata"
+    "MINIO_BUCKET" : "dumpedfiles"
 }
