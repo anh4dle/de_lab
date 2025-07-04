@@ -1,4 +1,4 @@
-from minio import Minio
+from minio.minio import Minio
 from dotenv import load_dotenv
 import os
 from utils.logger import logger
