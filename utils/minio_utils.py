@@ -1,7 +1,5 @@
 from minio import Minio
 import os
-from dotenv import load_dotenv
-from pathlib import Path
 
 
 def get_minio_client(minio_access: str, minio_pass: str):
@@ -28,7 +26,12 @@ def create_bucket(minio_client: Minio, bucket_name: str):
 
 
 def upload_stream_obj(minio_client: Minio, bucket_name: str, object_name: str, data):
-    minio_client.put_object(bucket_name, object_name, data)
+    try:
+        minio_client.put_object(bucket_name, object_name,
+                                data, length=data.getbuffer().nbytes,)
+        return True
+    except Exception as e:
+        raise Exception(f"Upload stream obj failed: {e}")
 
 
 def main():

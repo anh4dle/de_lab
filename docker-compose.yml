@@ -30,12 +30,12 @@ x-airflow-common: &airflow-common
     AIRFLOW_CONFIG: "/opt/airflow/config/airflow.cfg"
   volumes:
     - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-./airflow}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-./airflow}/jobs:/opt/airflow/jobs
-    - ${AIRFLOW_PROJ_DIR:-./airflow}/utils:/opt/airflow/utils
-    - ${AIRFLOW_PROJ_DIR:-./airflow}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/jobs:/opt/airflow/jobs
+    - ${AIRFLOW_PROJ_DIR:-.}/utils:/opt/airflow/utils
+    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
@@ -99,7 +99,7 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
-      - ./init-postgres:/docker-entrypoint-initdb.d/
+      - ./infra/init-postgres:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s
@@ -111,8 +111,8 @@ services:
       - "8089:8080" #Map hostport 8443 to container port
     image: "trinodb/trino:470"
     volumes:
-      - ./trino/etc:/usr/lib/trino/etc:ro
-      - ./trino/catalog:/etc/trino/catalog
+      - ./infra/trino/etc:/usr/lib/trino/etc:ro
+      - ./infra/trino/catalog:/etc/trino/catalog
 #   redis:
 #     # Redis is limited to 7.2-bookworm due to licencing change
 #     # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
