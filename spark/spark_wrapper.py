@@ -6,6 +6,7 @@ from pyspark.sql import SparkSession
 load_dotenv()
 
 os.environ["JAVA_HOME"] = os.getenv("JAVA_HOME")
+os.environ["SPARK_HOME"] = os.getenv("SPARK_HOME")
 
 
 class SparkWrapper:
@@ -20,5 +21,7 @@ class SparkWrapper:
             builder = builder.config(k, v)
         return builder.getOrCreate()
 
-    def read_parquet(self):
-        df = self.spark.read.parquet("file:///home/user/data/taxi.parquet")
+    def read_parquet(self, object_path):
+        df = self.spark.read.parquet(object_path)
+        df.show(10)
+        return df

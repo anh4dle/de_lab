@@ -7,7 +7,5 @@
 ## Todo:
 
 - Test spark
-- Tach download va upload
-- Change file path to include date time for upload
 - Create iceberg table for all bucket first
 - Use spark to append data from source to iceberg

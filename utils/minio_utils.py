@@ -1,4 +1,5 @@
 from minio import Minio
+from utils.logger import logger
 
 
 class MinIOWrapper:
@@ -12,7 +13,8 @@ class MinIOWrapper:
 
     def get_downloaded_files_by_year(self, bucket, year):
         try:
-            prefix = f"{year}/"  # Ensure it's a string with a trailing slash
+            # Ensure it's a string with a trailing slash
+            prefix = f"parquetfiles/{year}/"
 
             objects = self.minio_client.list_objects(
                 bucket, prefix=prefix, recursive=True)
@@ -27,11 +29,13 @@ class MinIOWrapper:
             self.minio_client.make_bucket(bucket_name)
 
     def upload_stream_obj(self, bucket_name: str, object_name: str, data):
+        from pathlib import Path
         try:
+            if isinstance(object_name, Path):
+                object_name = str(object_name)
             self.minio_client.put_object(bucket_name, object_name,
                                          data, length=data.getbuffer().nbytes)
-            print(f"Upload {object_name} succeeded.")
+            logger.info(f"Upload {object_name} succeeded.")
         except Exception as e:
-            print(str(e))
             raise Exception(
                 f"Upload stream obj {object_name} to bucket {bucket_name} failed {str(e)}")

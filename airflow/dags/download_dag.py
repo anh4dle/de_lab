@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import timedelta
 from airflow.decorators import dag, task
 import pendulum
-from jobs.extract.extract import extract
+from jobs.extract.download_files import extract
 import asyncio
 import csv
 
