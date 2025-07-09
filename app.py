@@ -13,14 +13,21 @@ tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 def test_spark():
     APP_NAME = 'spark_app'
-    OBJECT_PATH = 's3a://lake/raw/2020/'
+    OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
+    # OBJECT_PATH = "s3a://lake/parquetfiles/2020/yellow_tripdata_2020-04.parquet"
 
     config_path = os.getenv('LOCAL_CONFIG_PATH')
     config = ConfigLoader(config_path)
     config_dict = config.get_yaml_config_dict()
-    spark = SparkWrapper(APP_NAME, config_dict)
-    spark.read_parquet(OBJECT_PATH)
+    sparkWrapper = SparkWrapper(APP_NAME, config_dict)
+    spark = sparkWrapper.spark
 
+    spark.sparkContext.setLogLevel("DEBUG")
+    try:
+        df = spark.read.parquet(OBJECT_PATH)
+        df.show()
+    except Exception as e:
+        print("Printing exception err:", e)
     spark.stop()
 
 

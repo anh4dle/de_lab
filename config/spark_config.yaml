@@ -1,7 +1,8 @@
 spark:
   appName: "taxi-lakehouse"
-  master: "local[*]"
+  master: "local[2]"
   configs:
+    spark.jars: "jars/hadoop-aws-3.3.5.jar,jars/aws-java-sdk-bundle-1.12.261.jar, jars/hadoop-common-3.3.5.jar"
     spark.sql.catalog.iceberg: "org.apache.iceberg.spark.SparkCatalog" 
     spark.sql.catalog.iceberg.type: "hive" 
     spark.sql.catalog.iceberg.uri: "thrift://hive-metastore:9083" 
@@ -9,6 +10,5 @@ spark:
     spark.hadoop.fs.s3a.access.key: {MINIO_ROOT_USER}
     spark.hadoop.fs.s3a.secret.key: {MINIO_ROOT_PASSWORD} 
     spark.hadoop.fs.s3a.path.style.access: "true" 
-    spark.jars.packages: "org.apache.hadoop:hadoop-aws:3.3.5,org.apache.hadoop:hadoop-common:3.3.5,org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.5.2,com.amazonaws:aws-java-sdk-bundle:1.12.261"
-    # spark.jars.packages: "org.apache.hadoop:hadoop-aws:3.3.5, org.apache.hadoop:hadoop-common:3.3.5" #A module that enable hadoop to interact with S3 file system
     spark.hadoop.fs.s3a.impl: "org.apache.hadoop.fs.s3a.S3AFileSystem" 
+    

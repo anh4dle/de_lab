@@ -46,7 +46,6 @@ services:
   spark-master:
     image: "bitnami/spark:3.4.1"
     container_name: spark-master
-    entrypoint: ["./entrypoint.sh", "master"]
     ports:
       - "8080:8080"
       - "7077:7077"
@@ -55,19 +54,22 @@ services:
       SPARK_MASTER_PORT: 7077
       SPARK_MASTER_WEBUI_PORT: 8080
       SPARK_MASTER_REST_PORT: 4040
+      SPARK_HOME: /opt/bitnami/spark
     volumes:
       - spark-logs:/opt/spark/spark-events
+      - ./spark/jars/:/opt/bitnami/spark/jars
   spark-worker:
     image: "bitnami/spark:3.4.1"
     container_name: spark-worker
-    entrypoint: ["./entrypoint.sh", "worker"]
     depends_on:
       - spark-master
     volumes:
       - spark-logs:/opt/spark/spark-events
+      - ./spark/jars/:/opt/bitnami/spark/jars
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_HOME: /opt/bitnami/spark
   hive-metastore:
     image: "starburstdata/hive:3.1.2-e.18"
     ports:

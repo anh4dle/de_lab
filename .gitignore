@@ -5,3 +5,4 @@ logs
 airflow/data
 airflow/logs
 airflow/plugins
+spark/jars
