@@ -2,11 +2,11 @@ spark:
   appName: "taxi-lakehouse"
   master: "local[2]"
   configs:
-    spark.jars: "jars/hadoop-aws-3.3.5.jar,jars/aws-java-sdk-bundle-1.12.261.jar, jars/hadoop-common-3.3.5.jar"
+    spark.jars: "spark/jars/hadoop-aws-3.3.4.jar,spark/jars/aws-java-sdk-bundle-1.12.262.jar, spark/jars/hadoop-common-3.3.4.jar"
     spark.sql.catalog.iceberg: "org.apache.iceberg.spark.SparkCatalog" 
     spark.sql.catalog.iceberg.type: "hive" 
     spark.sql.catalog.iceberg.uri: "thrift://hive-metastore:9083" 
-    spark.hadoop.fs.s3a.endpoint: {MINIO_URL_LOCAL}
+    spark.hadoop.fs.s3a.endpoint: "http://{MINIO_URL_LOCAL}"
     spark.hadoop.fs.s3a.access.key: {MINIO_ROOT_USER}
     spark.hadoop.fs.s3a.secret.key: {MINIO_ROOT_PASSWORD} 
     spark.hadoop.fs.s3a.path.style.access: "true" 
