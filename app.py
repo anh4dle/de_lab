@@ -14,7 +14,7 @@ tz = pytz.timezone("Asia/Ho_Chi_Minh")
 def test_spark():
     APP_NAME = 'spark_app'
     OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
-    ICEBERG_TABLE = 'iceberg.default.taxi_raw'
+    ICEBERG_TABLE = 'taxi_raw'
     # OBJECT_PATH = "s3a://lake/parquetfiles/2020/yellow_tripdata_2020-04.parquet"
 
     config_path = os.getenv('LOCAL_CONFIG_PATH')
@@ -25,6 +25,7 @@ def test_spark():
 
     try:
         df = spark.read.parquet(OBJECT_PATH)
+        # Update spark config to point to iceberg catalog, default schema
         df.writeTo(ICEBERG_TABLE).append()
         df.show()
     except Exception as e:
