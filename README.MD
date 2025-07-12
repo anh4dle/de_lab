@@ -6,6 +6,4 @@
 
 ## Todo:
 
-- Test spark
-- Create iceberg table for all bucket first
-- Use spark to append data from source to iceberg
+- Find ways to not append duplicate val to raw layer

@@ -13,20 +13,22 @@ tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 def test_spark():
     APP_NAME = 'spark_app'
-    OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
-    ICEBERG_TABLE = 'taxi_raw'
-    # OBJECT_PATH = "s3a://lake/parquetfiles/2020/yellow_tripdata_2020-04.parquet"
+    # OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
+    CATALOG_NAME = 'iceberg'
+    DB_NAME = 'default'
+    ICEBERG_TABLE = 'default.taxi_raw'
+    OBJECT_PATH = "s3a://lake/parquetfiles/2020/yellow_tripdata_2020-04.parquet"
 
     config_path = os.getenv('LOCAL_CONFIG_PATH')
     config = ConfigLoader(config_path)
     config_dict = config.get_yaml_config_dict()
-    sparkWrapper = SparkWrapper(APP_NAME, config_dict)
+    sparkWrapper = SparkWrapper(APP_NAME, config_dict, CATALOG_NAME, DB_NAME)
     spark = sparkWrapper.spark
 
     try:
         df = spark.read.parquet(OBJECT_PATH)
-        # Update spark config to point to iceberg catalog, default schema
         df.writeTo(ICEBERG_TABLE).append()
+
         df.show()
     except Exception as e:
         print("Printing exception err:", e)

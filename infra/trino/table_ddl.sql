@@ -1,7 +1,9 @@
 --Create iceberg table for raw layer
+DROP TABLE IF EXISTS iceberg.default.taxi_raw;
 CREATE TABLE iceberg.default.taxi_raw (
     VendorID INT,
     tpep_pickup_datetime TIMESTAMP,
+    tpep_dropoff_datetime TIMESTAMP,
     passenger_count INT,
     trip_distance DOUBLE,
     RatecodeID INT,
@@ -20,6 +22,6 @@ CREATE TABLE iceberg.default.taxi_raw (
     airport_fee DOUBLE
 )
 WITH (
-	location = 's3://lake/raw/',
+	location = 's3a://lake/raw/',
     format = 'PARQUET'
 );

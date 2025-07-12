@@ -14,9 +14,11 @@ os.environ["JAVA_HOME"] = os.getenv("JAVA_HOME")
 
 class SparkWrapper:
 
-    def __init__(self, app_name, config_dict):
+    def __init__(self, app_name, config_dict, catalog_name, db_name):
         self.spark = self.build_session(app_name, config_dict)
         self.spark.sparkContext.setLogLevel("DEBUG")
+        self.spark.catalog.setCurrentCatalog(catalog_name)
+        self.spark.catalog.setCurrentDatabase(db_name)
 
     def build_session(self, app_name, config_dict):
         builder = SparkSession.builder.appName(
