@@ -8,3 +8,4 @@
 
 - Find ways to not append duplicate val to raw layer
   - Search google on how not to append duplicate value to an iceberg table using Spark.
+  - Implement MERGE INTO
