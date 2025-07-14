@@ -7,6 +7,7 @@ from utils.minio_utils import MinIOWrapper
 from jobs.extract.download_files import extract_data
 from spark.spark_wrapper import SparkWrapper
 from config.config_loader import ConfigLoader
+from utils.logger import logger
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
@@ -16,8 +17,9 @@ def test_spark():
     # OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
-    ICEBERG_TABLE = 'default.taxi_raw'
+
     OBJECT_PATH = "s3a://lake/parquetfiles/2020/yellow_tripdata_2020-04.parquet"
+    TARGET_TABLE = 'default.taxi_raw'
 
     config_path = os.getenv('LOCAL_CONFIG_PATH')
     config = ConfigLoader(config_path)
@@ -26,10 +28,26 @@ def test_spark():
     spark = sparkWrapper.spark
 
     try:
-        df = spark.read.parquet(OBJECT_PATH)
-        df.writeTo(ICEBERG_TABLE).append()
+        df_source = spark.read.parquet(OBJECT_PATH)
+        df_source.createOrReplaceTempView('SOURCE_TABLE')
+        df_source_cols = df_source.columns
+        update_cols = ', '.join(
+            f"t.{col} = s.{col}" for col in df_source_cols
+        )
 
-        df.show()
+        logger.info("Checking col", df_source_cols)
+        SQL = f"""
+        MERGE INTO {TARGET_TABLE} t
+        USING SOURCE_TABLE s
+        ON t.tpep_pickup_datetime = s.tpep_pickup_datetime and t.tpep_dropoff_datetime = s.tpep_dropoff_datetime
+        WHEN MATCHED THEN
+        UPDATE SET {update_cols}
+        WHEN NOT MATCHED THEN INSERT *
+        """
+        # df.writeTo(TARGET_TABLE).append()
+        spark.sql(SQL)
+        logger.info(f"Printing result df_source count {df_source.count()}")
+        # df_source.show()
     except Exception as e:
         print("Printing exception err:", e)
 

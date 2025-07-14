@@ -2,8 +2,8 @@
 DROP TABLE IF EXISTS iceberg.default.taxi_raw;
 CREATE TABLE iceberg.default.taxi_raw (
     VendorID INT,
-    tpep_pickup_datetime TIMESTAMP,
-    tpep_dropoff_datetime TIMESTAMP,
+    tpep_pickup_datetime TIMESTAMP(0),
+    tpep_dropoff_datetime TIMESTAMP(0),
     passenger_count INT,
     trip_distance DOUBLE,
     RatecodeID INT,
