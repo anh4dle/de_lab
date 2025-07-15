@@ -14,11 +14,9 @@ tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 def test_spark():
     APP_NAME = 'spark_app'
-    # OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
+    OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
-
-    OBJECT_PATH = "s3a://lake/parquetfiles/2020/yellow_tripdata_2020-04.parquet"
     TARGET_TABLE = 'default.taxi_raw'
 
     config_path = os.getenv('LOCAL_CONFIG_PATH')
@@ -30,12 +28,10 @@ def test_spark():
     try:
         df_source = spark.read.parquet(OBJECT_PATH)
         df_source.createOrReplaceTempView('SOURCE_TABLE')
-        df_source_cols = df_source.columns
         update_cols = ', '.join(
-            f"t.{col} = s.{col}" for col in df_source_cols
+            f"t.{col} = s.{col}" for col in df_source.columns
         )
 
-        logger.info("Checking col", df_source_cols)
         SQL = f"""
         MERGE INTO {TARGET_TABLE} t
         USING SOURCE_TABLE s
@@ -44,14 +40,10 @@ def test_spark():
         UPDATE SET {update_cols}
         WHEN NOT MATCHED THEN INSERT *
         """
-        # df.writeTo(TARGET_TABLE).append()
         spark.sql(SQL)
-        logger.info(f"Printing result df_source count {df_source.count()}")
-        # df_source.show()
     except Exception as e:
         print("Printing exception err:", e)
 
-    # Append to raw table
     spark.stop()
 
 
