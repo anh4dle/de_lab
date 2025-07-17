@@ -6,4 +6,5 @@
 
 ## Todo:
 
-- Append to Raw Table.
+- ML question for Gold Zone
+- Reporting question for Gold Zone
