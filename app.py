@@ -14,22 +14,42 @@ from pyspark.sql.functions import sha2, concat_ws
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
-def etl_silver_volume():
-    # TODO: source, target, spark insert DF
-    # Read df from raw table
-    # Transform: drop col, change col name
-    # Write to target
-    APP_NAME = 'spark_app'
-    CATALOG_NAME = 'iceberg'
-    SRC_TABLE = 'default.taxi_raw'
+def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
+    spark = sparkWrapper.spark
 
-    DB_NAME = 'default'
-    TARGET_TABLE = 'default.trip_volume'
+    try:
+        df_source = spark.read.table(SRC_TABLE)
 
-    config_path = os.getenv('LOCAL_CONFIG_PATH')
-    config = ConfigLoader(config_path)
-    config_dict = config.get_yaml_config_dict()
-    sparkWrapper = SparkWrapper(APP_NAME, config_dict, CATALOG_NAME, DB_NAME)
+        query = """
+        select trip_id as id, year(dropoff_datetime) as year, month(dropoff_datetime) as month, 
+        day(dropoff_datetime) as day, sum(total_amount) as total_revenue
+        from iceberg.default.trip_info
+        group by year(dropoff_datetime), month(dropoff_datetime), day(dropoff_datetime), trip_id
+        """
+        df_source = spark.sql(query)
+
+        df_source.show(10)
+        df_source.createOrReplaceTempView('SOURCE_TABLE')
+
+        update_cols = ', '.join(
+            f"t.{col} = s.{col}" for col in df_source.columns
+        )
+
+        SQL = f"""
+        MERGE INTO {TARGET_TABLE} t
+        USING SOURCE_TABLE s
+        ON t.id = s.id
+        WHEN MATCHED THEN
+        UPDATE SET {update_cols}
+        WHEN NOT MATCHED THEN INSERT *
+        """
+        spark.sql(SQL)
+    except Exception as e:
+        logger.error("Printing exception err:" + str(e))
+    spark.stop()
+
+
+def etl_silver(sparkWrapper, SRC_TABLE, TARGET_TABLE):
     spark = sparkWrapper.spark
 
     try:
@@ -37,22 +57,28 @@ def etl_silver_volume():
         df_source = df_source.withColumnRenamed("tpep_pickup_datetime",
                                                 "pickup_datetime").withColumnRenamed("tpep_dropoff_datetime",
                                                                                      "dropoff_datetime")
+
         columns_to_keep = ["VendorID",
                            "pickup_datetime",
                            "dropoff_datetime",
                            "trip_distance",
                            "PULocationID",
-                           "DOLocationID"]
+                           "DOLocationID",
+                           "payment_type",
+                           "total_amount"]
+
         df_source = df_source.select(columns_to_keep)
+
         df_source = df_source.withColumn(
             "trip_id",
             sha2(concat_ws("||",
                            "VendorID",
                            "pickup_datetime",
                            "dropoff_datetime",
-                           "trip_distance",
                            "PULocationID",
                            "DOLocationID",
+                           "payment_type",
+                           "total_amount",
                            ), 256)
         )
         df_source.show(10)
@@ -74,20 +100,9 @@ def etl_silver_volume():
     except Exception as e:
         logger.error("Printing exception err:" + str(e))
     spark.stop()
-    pass
 
 
-def test_spark():
-    APP_NAME = 'spark_app'
-    OBJECT_PATH = 's3a://lake/parquetfiles/2020/'
-    CATALOG_NAME = 'iceberg'
-    DB_NAME = 'default'
-    TARGET_TABLE = 'default.taxi_raw'
-
-    config_path = os.getenv('LOCAL_CONFIG_PATH')
-    config = ConfigLoader(config_path)
-    config_dict = config.get_yaml_config_dict()
-    sparkWrapper = SparkWrapper(APP_NAME, config_dict, CATALOG_NAME, DB_NAME)
+def etl_source_to_bronze(sparkWrapper, OBJECT_PATH, TARGET_TABLE):
     spark = sparkWrapper.spark
 
     try:
@@ -126,8 +141,20 @@ async def test_extract():
 async def main():
     # await test_extract()
     # test_spark()
-    etl_silver_volume()
+    APP_NAME = 'spark_app'
+    CATALOG_NAME = 'iceberg'
+    DB_NAME = 'default'
+    spark_config_path = os.getenv('LOCAL_SPARK_CONFIG_PATH')
+    config = ConfigLoader(spark_config_path)
+    spark_config_dict = config.get_yaml_config_dict()
 
+    sparkWrapper = SparkWrapper(
+        APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
+
+    SRC_TABLE = 'default.trip_info'
+    TARGET_TABLE = 'default.trip_info_g'
+    # etl_silver(sparkWrapper, SRC_TABLE, TARGET_TABLE)
+    etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE)
 
 if __name__ == "__main__":
     asyncio.run(main())
