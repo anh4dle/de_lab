@@ -2,8 +2,10 @@
 
 - Data pipeline requirements:
 
+  - Scalability
   - Debugging: Use logging, monitoring, and alerting
-  - Fault Tolerance and Reliability: Idempotency, checkpoint and recovery, implement retry mechanisms
+  - Reliability: Idempotency
+  - Fault Tolerance: Retry mechanisms
   - Document: architecture, data flow
 
 - Data source:
