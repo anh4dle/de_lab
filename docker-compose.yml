@@ -44,7 +44,10 @@ x-airflow-common: &airflow-common
       condition: service_healthy
 services:
   spark-master:
-    image: "bitnami/spark:3.4.1"
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.spark
+    image: "bitnami/spark:3.5.0"
     container_name: spark-master
     entrypoint: ["./entrypoint.sh", "master"]
     ports:
@@ -56,22 +59,40 @@ services:
       SPARK_MASTER_WEBUI_PORT: 8080
       SPARK_MASTER_REST_PORT: 4040
       SPARK_HOME: /opt/bitnami/spark
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_URL: http://minio:9000
+      HIVE_URL: thrift://hive-metastore:9083
     volumes:
       - spark-logs:/opt/spark/spark-events
-      - ./spark/jars/:/opt/bitnami/spark/jars
+      - ./jars/:/opt/bitnami/spark/custom-jars
+      - ./app_prod.py:/opt/bitnami/spark/app_prod.py
+      - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+      - ./deps.zip:/opt/bitnami/spark/deps.zip
   spark-worker:
-    image: "bitnami/spark:3.4.1"
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    image: "bitnami/spark:3.5.0"
     container_name: spark-worker
     entrypoint: ["./entrypoint.sh", "worker"]
     depends_on:
       - spark-master
     volumes:
       - spark-logs:/opt/spark/spark-events
-      - ./spark/jars/:/opt/bitnami/spark/jars
+      - ./jars/:/opt/bitnami/spark/custom-jars
+      - ./app_prod.py:/opt/bitnami/spark/app_prod.py
+      - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+      - ./deps.zip:/opt/bitnami/spark/deps.zip
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
       SPARK_HOME: /opt/bitnami/spark
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_URL: http://minio:9000
+      HIVE_URL: thrift://hive-metastore:9083
+    command: start-worker.sh spark://spark-master:7077
   hive-metastore:
     image: "starburstdata/hive:3.1.2-e.18"
     ports:

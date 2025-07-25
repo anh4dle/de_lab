@@ -1,0 +1,13 @@
+spark:
+  appName: "taxi-lakehouse"
+  master: "local[*]"
+  configs:
+    spark.jars: "jars/hadoop-aws-3.3.4.jar,jars/hadoop-common-3.3.4.jar,jars/aws-java-sdk-bundle-1.12.262.jar,  jars/iceberg-spark-runtime-3.4_2.12-1.5.2.jar"
+    spark.sql.catalog.iceberg: org.apache.iceberg.spark.SparkCatalog
+    spark.sql.catalog.iceberg.type: "hive"
+    spark.sql.catalog.iceberg.uri: {HIVE_URL}
+    spark.hadoop.fs.s3a.endpoint: {MINIO_URL}
+    spark.hadoop.fs.s3a.access.key: {MINIO_ROOT_USER}
+    spark.hadoop.fs.s3a.secret.key: {MINIO_ROOT_PASSWORD}
+    spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.hadoop.fs.s3a.impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"

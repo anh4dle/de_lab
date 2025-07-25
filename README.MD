@@ -25,5 +25,11 @@
 
 ## Todo:
 
+<<<<<<< HEAD
 - Switch to Spark cluster
+=======
+- Fix to run on Spark
+- Dynamic config
+-
+>>>>>>> bc276f3 (upgrade spark to 3.5.0)
 - Data Quality Requirements

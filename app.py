@@ -25,6 +25,7 @@ def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         day(dropoff_datetime) as day, sum(total_amount) as total_revenue
         from iceberg.default.trip_info
         group by year(dropoff_datetime), month(dropoff_datetime), day(dropoff_datetime), trip_id
+        LIMIT 10
         """
         df_source = spark.sql(query)
 
@@ -46,6 +47,7 @@ def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         spark.sql(SQL)
     except Exception as e:
         logger.error("Printing exception err:" + str(e))
+        # print("Printing exception err:" + str(e))
     spark.stop()
 
 
@@ -98,7 +100,8 @@ def etl_silver(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         """
         spark.sql(SQL)
     except Exception as e:
-        logger.error("Printing exception err:" + str(e))
+        # logger.error("Printing exception err:" + str(e))
+        print("Printing exception err:" + str(e))
     spark.stop()
 
 

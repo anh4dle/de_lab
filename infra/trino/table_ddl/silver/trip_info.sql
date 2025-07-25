@@ -12,4 +12,5 @@ CREATE TABLE iceberg.default.trip_info (
     trip_id VARCHAR
 )
 WITH (
-	location = 's3a://lake/silver/trip_info');
+	location = 's3a://lake/silver/trip_info',
+);

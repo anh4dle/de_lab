@@ -8,5 +8,6 @@ CREATE TABLE iceberg.default.trip_info_g (
 )
 WITH (
     location = 's3a://lake/gold/trip_info_g',
+    format_version = 2,
     partitioning = ARRAY['year', 'month', 'day']
 );
