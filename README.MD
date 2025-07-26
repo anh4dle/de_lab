@@ -25,11 +25,5 @@
 
 ## Todo:
 
-<<<<<<< HEAD
-- Switch to Spark cluster
-=======
-- Fix to run on Spark
-- Dynamic config
--
->>>>>>> bc276f3 (upgrade spark to 3.5.0)
+- Have everything run on airflow, start with parquet --> bronze and then bronze --> silver, then silver to gold.
 - Data Quality Requirements
