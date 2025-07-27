@@ -6,7 +6,7 @@ import asyncio
 # from jobs.extract.download_files import extract_data
 from spark_utils.spark_wrapper import SparkWrapper
 from config.config_loader import ConfigLoader
-# from utils.logger import logger
+from utils.logger import logger
 from pyspark.sql.functions import sha2, concat_ws
 
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
@@ -45,8 +45,8 @@ def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         """
         spark.sql(SQL)
     except Exception as e:
-        # logger.error("Printing exception err:" + str(e))
-        print("Printing exception err:" + str(e))
+        logger.error("Printing exception err:" + str(e))
+        # print("Printing exception err:" + str(e))
 
     spark.stop()
 
@@ -70,18 +70,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-# from pyspark.sql import SparkSession
-
-# if __name__ == "__main__":
-#     spark = SparkSession.builder \
-#         .appName("TestSparkSubmit") \
-#         .getOrCreate()
-
-#     data = [("Alice", 1), ("Bob", 2), ("Carol", 3)]
-#     df = spark.createDataFrame(data, ["name", "value"])
-
-#     df.show()
-
-#     spark.stop()
