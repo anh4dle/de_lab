@@ -56,13 +56,14 @@ async def download_file_as_stream(aiohttp_session, download_url, retry_time, csv
             return
 
 
-async def upload_to_minio(minio: MinIOWrapper, download_url, dir_path, data, retry_time, csv_logger):
+async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_path, data, retry_time, csv_logger):
     last_dash = download_url.rfind("/")
     filename = download_url[last_dash + 1:]
     for attemp in range(retry_time + 1):
         try:
             minio_upload_path = Path(dir_path) / filename
-            minio.upload_stream_obj(bucket_name='lake',
+            minio.create_bucket(bucket_name)
+            minio.upload_stream_obj(bucket_name=bucket_name,
                                     object_name=minio_upload_path, data=data)
             return
         except Exception as e:
@@ -75,9 +76,9 @@ async def upload_to_minio(minio: MinIOWrapper, download_url, dir_path, data, ret
             return
 
 
-async def download_and_upload(minio: MinIOWrapper, aiohttp_session, dir_path, download_url, retry_time, csv_logger):
+async def download_and_upload(minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time, csv_logger):
     data = await download_file_as_stream(aiohttp_session, download_url, retry_time, csv_logger)
-    await upload_to_minio(minio, download_url, dir_path, data, retry_time, csv_logger)
+    await upload_to_minio(minio, bucket_name,  download_url, dir_path, data, retry_time, csv_logger)
 
 
 def convert_month_to_string(month):
@@ -88,7 +89,7 @@ def convert_month_to_string(month):
     return month
 
 
-async def extract_data(minio: MinIOWrapper, current_year, end_year, csv_logger):
+async def extract_data(minio: MinIOWrapper, bucket_name, current_year, end_year, csv_logger):
     urls = []
     retry_times = 0
 
@@ -96,7 +97,7 @@ async def extract_data(minio: MinIOWrapper, current_year, end_year, csv_logger):
         minio_upload_path = str(Path('parquetfiles') / str(current_year))
         month = 1
         downloaded_files = minio.get_downloaded_files_by_year(
-            'lake', current_year)
+            bucket_name, current_year)
         logger.info(f"Logging downloaded files {downloaded_files}")
         while month < 12:
             if month == 4:
@@ -112,7 +113,7 @@ async def extract_data(minio: MinIOWrapper, current_year, end_year, csv_logger):
         current_year += 1
     async with aiohttp.ClientSession() as aiohttp_session:
         # Wrap coroutines in tasks
-        tasks = [download_and_upload(minio, aiohttp_session, dir_path, url, retry_times, csv_logger)
+        tasks = [download_and_upload(minio, bucket_name, aiohttp_session, dir_path, url, retry_times, csv_logger)
                  for dir_path, url in urls]
         # Schedule and execute all tasks
         await asyncio.gather(*tasks)

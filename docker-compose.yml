@@ -17,6 +17,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
+    SPARK_CONFIG_PATH: "/opt/airflow/spark_config.yaml"
     PYTHONPATH: "/opt/airflow"
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
@@ -43,86 +44,86 @@ x-airflow-common: &airflow-common
     postgres:
       condition: service_healthy
 services:
-  spark-master:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.spark
-    image: "bitnami/spark:3.5.0"
-    container_name: spark-master
-    entrypoint: ["./entrypoint.sh", "master"]
-    ports:
-      - "8080:8080"
-      - "7077:7077"
-      - "4040:4040"
-    environment:
-      SPARK_MASTER_PORT: 7077
-      SPARK_MASTER_WEBUI_PORT: 8080
-      SPARK_MASTER_REST_PORT: 4040
-      SPARK_HOME: /opt/bitnami/spark
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_URL: http://minio:9000
-      HIVE_URL: thrift://hive-metastore:9083
-    volumes:
-      - spark-logs:/opt/spark/spark-events
-      - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./app_prod.py:/opt/bitnami/spark/app_prod.py
-      - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
-      - ./deps.zip:/opt/bitnami/spark/deps.zip
-  spark-worker:
-    build:
-      context: .
-      dockerfile: Dockerfile.spark
-    image: "bitnami/spark:3.5.0"
-    container_name: spark-worker
-    entrypoint: ["./entrypoint.sh", "worker"]
-    depends_on:
-      - spark-master
-    volumes:
-      - spark-logs:/opt/spark/spark-events
-      - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./app_prod.py:/opt/bitnami/spark/app_prod.py
-      - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
-      - ./deps.zip:/opt/bitnami/spark/deps.zip
-    environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_HOME: /opt/bitnami/spark
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_URL: http://minio:9000
-      HIVE_URL: thrift://hive-metastore:9083
-    command: start-worker.sh spark://spark-master:7077
-  hive-metastore:
-    image: "starburstdata/hive:3.1.2-e.18"
-    ports:
-      - "9083:9083"
-    environment:
-      SERVICE_NAME: metastore
-      HIVE_METASTORE_DRIVER: org.postgresql.Driver
-      HIVE_METASTORE_JDBC_URL: jdbc:postgresql://postgres:5432/hive_metastore_db
-      HIVE_METASTORE_USER: airflow
-      HIVE_METASTORE_PASSWORD: airflow
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
-      S3_PATH_STYLE_ACCESS: "true"
-      # Below arguments exist for no reasons, but
-      # we can not live without it
-      REGION: ""
-      GOOGLE_CLOUD_KEY_FILE_PATH: ""
-      AZURE_ADL_CLIENT_ID: ""
-      AZURE_ADL_CREDENTIAL: ""
-      AZURE_ADL_REFRESH_URL: ""
-      AZURE_ABFS_STORAGE_ACCOUNT: ""
-      AZURE_ABFS_ACCESS_KEY: ""
-      AZURE_WASB_STORAGE_ACCOUNT: ""
-      AZURE_ABFS_OAUTH: ""
-      AZURE_ABFS_OAUTH_TOKEN_PROVIDER: ""
-      AZURE_ABFS_OAUTH_CLIENT_ID: ""
-      AZURE_ABFS_OAUTH_SECRET: ""
-      AZURE_ABFS_OAUTH_ENDPOINT: ""
-      AZURE_WASB_ACCESS_KEY: ""
+  # spark-master:
+  #   # build:
+  #   #   context: .
+  #   #   dockerfile: Dockerfile.spark
+  #   image: "bitnami/spark:3.5.0"
+  #   container_name: spark-master
+  #   # entrypoint: ["./entrypoint.sh", "master"]
+  #   ports:
+  #     - "8080:8080"
+  #     - "7077:7077"
+  #     - "4040:4040"
+  #   environment:
+  #     SPARK_MASTER_PORT: 7077
+  #     SPARK_MASTER_WEBUI_PORT: 8080
+  #     SPARK_MASTER_REST_PORT: 4040
+  #     SPARK_HOME: /opt/bitnami/spark
+  #     MINIO_ROOT_USER: minioadmin
+  #     MINIO_ROOT_PASSWORD: minioadmin
+  #     MINIO_URL: http://minio:9000
+  #     HIVE_URL: thrift://hive-metastore:9083
+  #   volumes:
+  #     - spark-logs:/opt/spark/spark-events
+  #     - ./jars/:/opt/bitnami/spark/custom-jars
+  #     - ./app_prod.py:/opt/bitnami/spark/app_prod.py
+  #     - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+  #     - ./deps.zip:/opt/bitnami/spark/deps.zip
+  # spark-worker:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.spark
+  #   image: "bitnami/spark:3.5.0"
+  #   container_name: spark-worker
+  #   # entrypoint: ["./entrypoint.sh", "worker"]
+  #   depends_on:
+  #     - spark-master
+  #   volumes:
+  #     - spark-logs:/opt/spark/spark-events
+  #     - ./jars/:/opt/bitnami/spark/custom-jars
+  #     - ./app_prod.py:/opt/bitnami/spark/app_prod.py
+  #     - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+  #     - ./deps.zip:/opt/bitnami/spark/deps.zip
+  #   environment:
+  #     SPARK_MODE: worker
+  #     SPARK_MASTER_URL: spark://spark-master:7077
+  #     SPARK_HOME: /opt/bitnami/spark
+  #     MINIO_ROOT_USER: minioadmin
+  #     MINIO_ROOT_PASSWORD: minioadmin
+  #     MINIO_URL: http://minio:9000
+  #     HIVE_URL: thrift://hive-metastore:9083
+  #   command: start-worker.sh spark://spark-master:7077
+  # hive-metastore:
+  #   image: "starburstdata/hive:3.1.2-e.18"
+  #   ports:
+  #     - "9083:9083"
+  #   environment:
+  #     SERVICE_NAME: metastore
+  #     HIVE_METASTORE_DRIVER: org.postgresql.Driver
+  #     HIVE_METASTORE_JDBC_URL: jdbc:postgresql://postgres:5432/hive_metastore_db
+  #     HIVE_METASTORE_USER: airflow
+  #     HIVE_METASTORE_PASSWORD: airflow
+  #     S3_ENDPOINT: http://minio:9000
+  #     S3_ACCESS_KEY: minioadmin
+  #     S3_SECRET_KEY: minioadmin
+  #     S3_PATH_STYLE_ACCESS: "true"
+  #     # Below arguments exist for no reasons, but
+  #     # we can not live without it
+  #     REGION: ""
+  #     GOOGLE_CLOUD_KEY_FILE_PATH: ""
+  #     AZURE_ADL_CLIENT_ID: ""
+  #     AZURE_ADL_CREDENTIAL: ""
+  #     AZURE_ADL_REFRESH_URL: ""
+  #     AZURE_ABFS_STORAGE_ACCOUNT: ""
+  #     AZURE_ABFS_ACCESS_KEY: ""
+  #     AZURE_WASB_STORAGE_ACCOUNT: ""
+  #     AZURE_ABFS_OAUTH: ""
+  #     AZURE_ABFS_OAUTH_TOKEN_PROVIDER: ""
+  #     AZURE_ABFS_OAUTH_CLIENT_ID: ""
+  #     AZURE_ABFS_OAUTH_SECRET: ""
+  #     AZURE_ABFS_OAUTH_ENDPOINT: ""
+  #     AZURE_WASB_ACCESS_KEY: ""
   minio:
     image: minio/minio:latest
     ports:
@@ -139,6 +140,26 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+  # trino:
+  #   ports:
+  #     - "8089:8080"
+  #   image: "trinodb/trino:470"
+  #   volumes:
+  #     - ./infra/trino/etc:/usr/lib/trino/etc:ro
+  #     - ./infra/trino/catalog:/etc/trino/catalog
+  redis:
+    # Redis is limited to 7.2-bookworm due to licencing change
+    # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
+    image: redis:7.2-bookworm
+    expose:
+      - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
+    restart: always
   postgres:
     image: postgres:13
     environment:
@@ -154,33 +175,13 @@ services:
       retries: 5
       start_period: 5s
     restart: always
-  trino:
-    ports:
-      - "8089:8080" #Map hostport 8443 to container port
-    image: "trinodb/trino:470"
-    volumes:
-      - ./infra/trino/etc:/usr/lib/trino/etc:ro
-      - ./infra/trino/catalog:/etc/trino/catalog
-  redis:
-    # Redis is limited to 7.2-bookworm due to licencing change
-    # https://redis.io/blog/redis-adopts-dual-source-available-licensing/
-    image: redis:7.2-bookworm
-    expose:
-      - 6379
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 30s
-      retries: 50
-      start_period: 30s
-    restart: always
   airflow-apiserver:
     <<: *airflow-common
     command: api-server
     ports:
-      - "8080:8080"
+      - "8086:8080"
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/api/v2/version"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8086/api/v2/version"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -350,7 +351,17 @@ services:
         echo "Files in shared volumes:"
         echo
         ls -la /opt/airflow/{logs,dags,plugins,config}
+        echo "Running database migration..."
+        airflow db migrate
 
+        echo "Creating admin user..."
+        airflow users create \
+          --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow} \
+          --firstname Anh \
+          --lastname Le \
+          --role Admin \
+          --email anh4dle@gmail.com \
+          --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
     # yamllint enable rule:line-length
     environment:
       <<: *airflow-common-env

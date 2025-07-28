@@ -27,7 +27,6 @@ def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         LIMIT 10
         """
         df_source = spark.sql(query)
-
         df_source.show(10)
         df_source.createOrReplaceTempView('SOURCE_TABLE')
 
@@ -57,8 +56,8 @@ async def main():
     DB_NAME = 'default'
 
     spark_config_path = os.getenv('PROD_SPARK_CONFIG_PATH')
-    # config = ConfigLoader(spark_config_path)
-    config = ConfigLoader("/opt/bitnami/spark/spark_config_prod.yaml")
+    config = ConfigLoader(spark_config_path)
+    # config = ConfigLoader("/opt/bitnami/spark/spark_config_prod.yaml")
     spark_config_dict = config.get_yaml_config_dict()
 
     sparkWrapper = SparkWrapper(

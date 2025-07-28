@@ -1,5 +1,6 @@
 {
     "MINIO_ROOT_USER":"minioadmin",
     "MINIO_ROOT_PASSWORD":"minioadmin",
-    "MINIO_BUCKET" : "dumpedfiles"
+    "MINIO_BUCKET" : "dumpfiles",
+    "MINIO_URL":"minio:9000"
 }
