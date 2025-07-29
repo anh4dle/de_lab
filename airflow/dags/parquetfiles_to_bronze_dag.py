@@ -5,7 +5,7 @@ from airflow.models import Variable
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
 from utils.spark_wrapper import SparkWrapper
-from config.config_loader import ConfigLoader
+from utils.config_loader import ConfigLoader
 
 
 @dag(
@@ -14,8 +14,7 @@ from config.config_loader import ConfigLoader
     schedule="@daily",
 )
 def task_flow():
-    SPARK_HOME = Variable.get("SPARK_HOME")
-    PARQUETFILES_PATH = Variable.get("OBJECT_PATH")
+    PARQUETFILES_PATH = Variable.get("PARQUETFILES_PATH")
     BRONZE_TABLE = Variable.get("BRONZE_TABLE")
 
     @task
@@ -24,19 +23,21 @@ def task_flow():
         CATALOG_NAME = 'iceberg'
         DB_NAME = 'default'
 
-    # Input dict to spark submit operator
-        spark_config_path = Variable.get('SPARK_CONFIG_PATH')
-        config = ConfigLoader(spark_config_path)
+        # Input dict to spark submit operator
+        config = ConfigLoader(os.environ.get("SPARK_CONFIG_PATH"))
         spark_config_dict = config.get_yaml_config_dict()
 
         sparkWrapper = SparkWrapper(
             APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
 
-        # app_prod take in table name and use existing config from spark
-
         spark = sparkWrapper.spark
-        submit_job = SparkSubmitOperator(
-            application="${SPARK_HOME}/app_prod.py", task_id="submit_job")
+        app_path = os.path.join(os.environ.get(
+            "SPARK_HOME", "/opt/spark"), "source_to_bronze.py")
+        submit_job = SparkSubmitOperator(task_id="parquet_to_bronze", conn_id="spark_conn",
+                                         application=app_path,
+                                         application_args=[
+                                             PARQUETFILES_PATH, BRONZE_TABLE, sparkWrapper])
+
     load_data_to_bronze()
 
 

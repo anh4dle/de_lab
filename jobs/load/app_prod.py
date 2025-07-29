@@ -5,7 +5,7 @@ import asyncio
 # from utils.minio_utils import MinIOWrapper
 # from jobs.extract.download_files import extract_data
 from spark_utils.spark_wrapper import SparkWrapper
-from config.config_loader import ConfigLoader
+from utils.config_loader import ConfigLoader
 from utils.logger import logger
 from pyspark.sql.functions import sha2, concat_ws
 

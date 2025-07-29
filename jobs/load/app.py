@@ -6,7 +6,7 @@ import pytz
 from utils.minio_utils import MinIOWrapper
 from jobs.extract.download_and_upload import extract_data
 from utils.spark_wrapper import SparkWrapper
-from config.config_loader import ConfigLoader
+from utils.config_loader import ConfigLoader
 from utils.logger import logger
 from pyspark.sql.functions import sha2, concat_ws
 

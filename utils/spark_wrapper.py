@@ -6,7 +6,7 @@ import pyspark
 load_dotenv()
 
 
-os.environ["JAVA_HOME"] = os.getenv("JAVA_HOME")
+# os.environ["JAVA_HOME"] = os.getenv("JAVA_HOME")
 # os.environ["SPARK_HOME"] = os.getenv("SPARK_HOME")
 # os.environ['PYSPARK_SUBMIT_ARGS'] = '--jars jars/hadoop-aws-3.3.5.jar,jars/aws-java-sdk-bundle-1.12.261.jar,jars/iceberg-spark-runtime-3.4_2.12-1.5.2.jar pyspark-shell'
 

@@ -2,9 +2,9 @@ import asyncio
 import asyncio
 import pytz
 from utils.spark_wrapper import SparkWrapper
-from config.config_loader import ConfigLoader
+from utils.config_loader import ConfigLoader
 from utils.logger import logger
-
+import argparse
 
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
@@ -50,4 +50,7 @@ async def main(spark_config_path):
     etl_source_to_bronze(sparkWrapper, SRC_TABLE, TARGET_TABLE)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--spark_config_path", required=True)
+    args = parser.parse_args()
+    asyncio.run(main(args.spark_config_path))

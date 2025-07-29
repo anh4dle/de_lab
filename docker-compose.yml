@@ -19,6 +19,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
     SPARK_CONFIG_PATH: "/opt/airflow/spark_config.yaml"
     PYTHONPATH: "/opt/airflow"
+    SPARK_HOME: "/opt/spark"
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -230,7 +231,6 @@ services:
     <<: *airflow-common
     command: celery worker
     healthcheck:
-      # yamllint disable rule:line-length
       test:
         - "CMD-SHELL"
         - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
