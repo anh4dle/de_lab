@@ -2,9 +2,9 @@ from pathlib import Path
 from datetime import timedelta
 from airflow.decorators import dag, task
 import pendulum
-from jobs.extract.download_files import extract_data
+from jobs.extract.download_and_upload import submit_download_and_upload
 from utils.minio_utils import MinIOWrapper
-from airflow.sdk import Variable
+from airflow.models import Variable
 import asyncio
 import csv
 
@@ -45,7 +45,7 @@ def task_flow():
                 header = ['File', 'Error', 'Time']
                 csv_writer.writerow(header)
 
-        asyncio.run(extract_data(minio, bucket_name, current_year, end_year,
+        asyncio.run(submit_download_and_upload(minio, bucket_name, current_year, end_year,
                     csv_writer))
     download()
 

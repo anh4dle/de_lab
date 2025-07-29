@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 import pyspark
 # Load the env file
 load_dotenv()
-print('asd', os.path.dirname(pyspark.__file__))
+
 
 os.environ["JAVA_HOME"] = os.getenv("JAVA_HOME")
 # os.environ["SPARK_HOME"] = os.getenv("SPARK_HOME")

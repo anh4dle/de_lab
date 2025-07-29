@@ -89,7 +89,7 @@ def convert_month_to_string(month):
     return month
 
 
-async def extract_data(minio: MinIOWrapper, bucket_name, current_year, end_year, csv_logger):
+async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_year, end_year, csv_logger):
     urls = []
     retry_times = 0
 

@@ -2,5 +2,6 @@
     "MINIO_ROOT_USER":"minioadmin",
     "MINIO_ROOT_PASSWORD":"minioadmin",
     "MINIO_BUCKET" : "dumpfiles",
-    "MINIO_URL":"minio:9000"
+    "MINIO_URL":"minio:9000",
+    "SPARK_CONFIG_PATH":"/opt/bitnami/spark/spark_config_prod.yaml"
 }

@@ -177,7 +177,7 @@ services:
     restart: always
   airflow-apiserver:
     <<: *airflow-common
-    command: api-server
+    command: webserver
     ports:
       - "8086:8080"
     healthcheck:
@@ -371,6 +371,9 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ""
     user: "0:0"
+    depends_on:
+      postgres:
+        condition: service_started
 
   airflow-cli:
     <<: *airflow-common
