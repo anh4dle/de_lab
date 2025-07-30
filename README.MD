@@ -25,6 +25,5 @@
 
 ## Todo:
 
-- Write dag for parquet to bronze.
-- Have everything run on airflow, start with parquet --> bronze and then bronze --> silver, then silver to gold.
+- Add logger to parquetfiles -> bronze dag, test dag.
 - Data Quality Requirements

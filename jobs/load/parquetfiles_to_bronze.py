@@ -33,12 +33,10 @@ def etl_source_to_bronze(sparkWrapper, OBJECT_PATH, TARGET_TABLE):
     spark.stop()
 
 
-async def main(spark_config_path):
-    APP_NAME = 'spark_app'
+async def main(SRC_TABLE, TARGET_TABLE, spark_config_path):
+    APP_NAME = 'parquet_to_bronze'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
-
-    # spark_config_path = os.getenv('LOCAL_SPARK_CONFIG_PATH')
 
     config = ConfigLoader(spark_config_path)
     spark_config_dict = config.get_yaml_config_dict()
@@ -49,8 +47,20 @@ async def main(spark_config_path):
     TARGET_TABLE = 'default.trip_info_g'
     etl_source_to_bronze(sparkWrapper, SRC_TABLE, TARGET_TABLE)
 
-if __name__ == "__main__":
+
+def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--SRC_TABLE", required=True)
+    parser.add_argument("--TARGET_TABLE", required=True)
     parser.add_argument("--spark_config_path", required=True)
     args = parser.parse_args()
-    asyncio.run(main(args.spark_config_path))
+    return args
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    asyncio.run(main(
+        args.spark_config_path,
+        args.input_path,
+        args.output_path
+    ))

@@ -27,18 +27,22 @@ def task_flow():
         config = ConfigLoader(os.environ.get("SPARK_CONFIG_PATH"))
         spark_config_dict = config.get_yaml_config_dict()
 
-        sparkWrapper = SparkWrapper(
-            APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
-
-        spark = sparkWrapper.spark
         app_path = os.path.join(os.environ.get(
             "SPARK_HOME", "/opt/spark"), "source_to_bronze.py")
         submit_job = SparkSubmitOperator(task_id="parquet_to_bronze", conn_id="spark_conn",
                                          application=app_path,
                                          application_args=[
-                                             PARQUETFILES_PATH, BRONZE_TABLE, sparkWrapper])
+                                             PARQUETFILES_PATH, BRONZE_TABLE])
 
     load_data_to_bronze()
 
+
+"""
+Input: sparksubmitOperator(app, args)
+APP Input: configDict, source and target table, sparkWrapper.
+SparkWrapper Input:(app name, dict, catalog, db)
+Create sparkWrapper in dag or inside app. Can do inside app since dict is tight coupling already. Fine for now. so we can create sparkWrapper in the app
+mean that we only need to pass source and target table
+"""
 
 dag = task_flow()
