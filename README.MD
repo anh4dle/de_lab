@@ -25,5 +25,6 @@
 
 ## Todo:
 
+- Fix Spark HOME
 - Add logger to parquetfiles -> bronze dag, test dag.
 - Data Quality Requirements

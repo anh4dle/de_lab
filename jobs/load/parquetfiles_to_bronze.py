@@ -9,11 +9,9 @@ import argparse
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
-def etl_source_to_bronze(sparkWrapper, OBJECT_PATH, TARGET_TABLE):
-    spark = sparkWrapper.spark
-
+def etl_source_to_bronze(spark_session, OBJECT_PATH, TARGET_TABLE):
     try:
-        df_source = spark.read.parquet(OBJECT_PATH)
+        df_source = spark_session.read.parquet(OBJECT_PATH)
         df_source.createOrReplaceTempView('SOURCE_TABLE')
         update_cols = ', '.join(
             f"t.{col} = s.{col}" for col in df_source.columns
@@ -27,25 +25,25 @@ def etl_source_to_bronze(sparkWrapper, OBJECT_PATH, TARGET_TABLE):
         UPDATE SET {update_cols}
         WHEN NOT MATCHED THEN INSERT *
         """
-        spark.sql(SQL)
+        spark_session.sql(SQL)
     except Exception as e:
         print("Printing exception err:", e)
-    spark.stop()
+    spark_session.stop()
 
 
-async def main(SRC_TABLE, TARGET_TABLE, spark_config_path):
+async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
     APP_NAME = 'parquet_to_bronze'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
 
-    config = ConfigLoader(spark_config_path)
+    config = ConfigLoader(SPARK_CONFIG_PATH)
     spark_config_dict = config.get_yaml_config_dict()
     sparkWrapper = SparkWrapper(
         APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
 
     SRC_TABLE = 'default.trip_info'
     TARGET_TABLE = 'default.trip_info_g'
-    etl_source_to_bronze(sparkWrapper, SRC_TABLE, TARGET_TABLE)
+    etl_source_to_bronze(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
 
 
 def parse_args():
