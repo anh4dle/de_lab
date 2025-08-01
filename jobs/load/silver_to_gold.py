@@ -1,19 +1,16 @@
 import os
 import asyncio
-import csv
-import asyncio
-# from utils.minio_utils import MinIOWrapper
-# from jobs.extract.download_files import extract_data
 from spark_utils.spark_wrapper import SparkWrapper
 from utils.config_loader import ConfigLoader
 from utils.logger import logger
 from pyspark.sql.functions import sha2, concat_ws
+import argparse
 
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 # tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
-def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
+def silver_to_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
     spark = sparkWrapper.spark
 
     try:
@@ -50,22 +47,34 @@ def etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
     spark.stop()
 
 
-async def main():
-    APP_NAME = 'spark_app'
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--SRC_TABLE", required=True)
+    parser.add_argument("--TARGET_TABLE", required=True)
+    parser.add_argument("--spark_config_path", required=True)
+    args = parser.parse_args()
+    return args
+
+
+async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
+    APP_NAME = 'silver_to_gold'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
 
-    spark_config_path = os.getenv('PROD_SPARK_CONFIG_PATH')
-    config = ConfigLoader(spark_config_path)
-    # config = ConfigLoader("/opt/bitnami/spark/spark_config_prod.yaml")
+    config = ConfigLoader(SPARK_CONFIG_PATH)
     spark_config_dict = config.get_yaml_config_dict()
-
     sparkWrapper = SparkWrapper(
         APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
 
     SRC_TABLE = 'default.trip_info'
     TARGET_TABLE = 'default.trip_info_g'
-    etl_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE)
+    silver_to_gold(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    args = parse_args()
+    asyncio.run(main(
+        args.spark_config_path,
+        args.SRC_TABLE,
+        args.TARGET_TABLE
+    ))

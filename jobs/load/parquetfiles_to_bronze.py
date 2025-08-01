@@ -59,6 +59,6 @@ if __name__ == "__main__":
     args = parse_args()
     asyncio.run(main(
         args.spark_config_path,
-        args.input_path,
-        args.output_path
+        args.SRC_TABLE,
+        args.TARGET_TABLE
     ))
