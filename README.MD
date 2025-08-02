@@ -4,7 +4,7 @@
 
   - Scalability
   - Debugging: Use logging, monitoring, and alerting
-  - Reliability: Idempotency
+  - Reliability: Idempotency.
   - Fault Tolerance: Retry mechanisms
   - Document: architecture, data flow
 
@@ -25,6 +25,6 @@
 
 ## Todo:
 
-- Fix Spark HOME
+- Fix Env from config to have it in driver
 - Add logger to parquetfiles -> bronze dag, test dag.
 - Data Quality Requirements

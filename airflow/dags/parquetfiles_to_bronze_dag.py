@@ -22,8 +22,8 @@ with DAG(
     tags=["ingestion"],
     default_args=DEFAULT_ARGS,
 ) as dag:
-    spark_home = Path(Variable.get("SPARK_HOME"))
-    app_path = spark_home / "jobs" / "load" / "parquetfiles_to_bronze.py"
+    AIRFLOW_HOME = Path(Variable.get("AIRFLOW_HOME"))
+    app_path = AIRFLOW_HOME / "jobs" / "load" / "parquetfiles_to_bronze.py"
 
     # Cannot use inside taskflow API so we use context manager
     submit_job = SparkSubmitOperator(
@@ -31,10 +31,10 @@ with DAG(
         conn_id="spark_conn",
         application=str(app_path.resolve()),
         application_args=[
-            Variable.get("PARQUETFILES_PATH"),
-            Variable.get("BRONZE_TABLE"),
-            Variable.get("SPARK_CONFIG_PATH"),
-        ],
+            "--SRC_TABLE", Variable.get("PARQUETFILES_PATH"),
+            "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
+            "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
+        ]
     )
 
 """

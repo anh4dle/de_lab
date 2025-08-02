@@ -3,6 +3,7 @@ spark:
   master: "spark://spark-master:7077"
   configs:
     spark.jars: "/opt/bitnami/spark/custom-jars/hadoop-aws-3.3.4.jar,/opt/bitnami/spark/custom-jars/hadoop-common-3.3.4.jar,/opt/bitnami/spark/custom-jars/aws-java-sdk-bundle-1.12.262.jar,  /opt/bitnami/spark/custom-jars/iceberg-spark-runtime-3.4_2.12-1.5.2.jar"
+    spark.submit.deployMode: "client"
     spark.sql.catalog.iceberg: org.apache.iceberg.spark.SparkCatalog
     spark.sql.catalog.iceberg.type: "hive"
     spark.sql.catalog.iceberg.uri: {HIVE_URL}

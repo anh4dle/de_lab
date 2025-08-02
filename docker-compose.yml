@@ -32,10 +32,10 @@ x-airflow-common: &airflow-common
     - ${AIRFLOW_PROJ_DIR:-./airflow}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-./airflow}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-./airflow}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/jobs:/opt/airflow/jobs
-    - ${AIRFLOW_PROJ_DIR:-.}/utils:/opt/airflow/utils
-    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-./airflow}/jobs:/opt/airflow/jobs
+    - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-./airflow}/utils:/opt/airflow/utils
+    - ${AIRFLOW_PROJ_DIR:-./airflow}/data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
@@ -67,7 +67,7 @@ services:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
       - ./jobs:/opt/bitnami/spark/jobs
-      - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+      - ./utils/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
       - ./deps.zip:/opt/bitnami/spark/deps.zip
   spark-worker:
     build:
@@ -82,7 +82,7 @@ services:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
       - ./jobs:/opt/bitnami/spark/jobs
-      - ./config/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+      - ./utils/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
       - ./deps.zip:/opt/bitnami/spark/deps.zip
     environment:
       SPARK_MODE: worker
