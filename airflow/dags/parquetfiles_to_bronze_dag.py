@@ -34,7 +34,8 @@ with DAG(
             "--SRC_TABLE", Variable.get("PARQUETFILES_PATH"),
             "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
             "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
-        ]
+        ],
+        packages="org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.5.2",
     )
 
 """

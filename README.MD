@@ -25,6 +25,7 @@
 
 ## Todo:
 
-- Fix Env from config to have it in driver
+- Run the DAG and debug.
+- Fix [2025-08-04, 10:52:15 +07] {spark_submit.py:648} INFO - KeyError: 'spark.jars'
 - Add logger to parquetfiles -> bronze dag, test dag.
-- Data Quality Requirements
+- Data Quality Requirements.
