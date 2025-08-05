@@ -23,7 +23,7 @@ DEFAULT_ARGS = {
 @dag(
     DAG_ID,
     schedule=CRON_SCHEDULE,
-    description='A DAG to download taxi data files and upload to lake',
+    description='A DAG to download taxi data files and upload to bucket parquetfiles on minio',
     default_args=DEFAULT_ARGS,
     catchup=False,
     dagrun_timeout=timedelta(minutes=20),

@@ -16,3 +16,6 @@ USER airflow
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
+
+RUN pip install pyspark==3.5.0 --force-reinstall
+

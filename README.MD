@@ -26,6 +26,6 @@
 ## Todo:
 
 - Run the DAG and debug.
-- Fix [2025-08-04, 10:52:15 +07] {spark_submit.py:648} INFO - KeyError: 'spark.jars'
+- Missing hadoop dependencies --> look for the required jars
 - Add logger to parquetfiles -> bronze dag, test dag.
 - Data Quality Requirements.

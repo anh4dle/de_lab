@@ -6,5 +6,5 @@
     "SPARK_CONFIG_PATH":"/opt/bitnami/spark/spark_config_prod.yaml",
     "SPARK_HOME":"/opt/bitnami/spark",
     "PARQUETFILES_PATH":"lake/parquetfiles",
-    "BRONZE_TABLE":"default.trip_info"
+    "BRONZE_TABLE":"default.taxi_raw"
 }

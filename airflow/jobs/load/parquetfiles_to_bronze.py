@@ -41,8 +41,6 @@ async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
     sparkWrapper = SparkWrapper(
         APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
 
-    SRC_TABLE = 'default.trip_info'
-    TARGET_TABLE = 'default.trip_info_g'
     etl_source_to_bronze(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
 
 

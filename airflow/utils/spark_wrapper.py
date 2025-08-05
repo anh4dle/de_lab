@@ -15,8 +15,8 @@ class SparkWrapper:
             app_name)
         for k, v in config_dict['spark']['configs'].items():
             builder = builder.config(k, v)
-        v = config_dict['spark']['configs']['spark.jars']
-        builder = builder.config("spark.jars", v)
+        # v = config_dict['spark']['configs']['spark.jars']
+        # builder = builder.config("spark.jars", v)
 
         return builder.getOrCreate()
 

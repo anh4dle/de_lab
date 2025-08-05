@@ -17,6 +17,7 @@ DEFAULT_ARGS = {
 with DAG(
     dag_id="parquetfiles_to_bronze",
     start_date=datetime.datetime(2021, 1, 1),
+    description="A dag to load data from parquetfiles bucket to bronze table",
     schedule="@daily",
     catchup=False,
     tags=["ingestion"],
@@ -35,7 +36,11 @@ with DAG(
             "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
             "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
         ],
-        packages="org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.4_2.12:1.5.2",
+        conf={
+            'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
+            'spark.hadoop.fs.s3a.path.style.access': 'true'
+        },
+        packages="org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.2",
     )
 
 """
