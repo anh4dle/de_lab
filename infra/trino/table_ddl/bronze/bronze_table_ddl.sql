@@ -19,7 +19,7 @@ CREATE TABLE iceberg.default.taxi_raw (
     improvement_surcharge DOUBLE,
     total_amount DOUBLE,
     congestion_surcharge DOUBLE,
-    airport_fee DOUBLE
+    airport_fee INTEGER
 )
 WITH (
 	location = 's3a://lake/raw/',

@@ -9,6 +9,10 @@ import argparse
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
+def update_schema():
+    pass
+
+
 def etl_source_to_bronze(spark_session, OBJECT_PATH, TARGET_TABLE):
     try:
         df_source = spark_session.read.parquet(OBJECT_PATH)
@@ -20,7 +24,7 @@ def etl_source_to_bronze(spark_session, OBJECT_PATH, TARGET_TABLE):
         SQL = f"""
         MERGE INTO {TARGET_TABLE} t
         USING SOURCE_TABLE s
-        ON t.pickup_datetime = s.pickup_datetime and t.dropoff_datetime = s.dropoff_datetime
+        ON t.tpep_pickup_datetime = s.tpep_pickup_datetime and t.tpep_dropoff_datetime = s.tpep_dropoff_datetime
         WHEN MATCHED THEN
         UPDATE SET {update_cols}
         WHEN NOT MATCHED THEN INSERT *
