@@ -1,17 +1,11 @@
-import os
 import asyncio
-from spark_utils.spark_wrapper import SparkWrapper
+from utils.spark_wrapper import SparkWrapper
 from utils.config_loader import ConfigLoader
 from utils.logger import logger
-from pyspark.sql.functions import sha2, concat_ws
 import argparse
 
-# base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
-# tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
-
-def silver_to_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
-    spark = sparkWrapper.spark
+def silver_to_gold(spark, SRC_TABLE, TARGET_TABLE):
 
     try:
         df_source = spark.read.table(SRC_TABLE)
@@ -43,7 +37,6 @@ def silver_to_gold(sparkWrapper, SRC_TABLE, TARGET_TABLE):
     except Exception as e:
         logger.error("Printing exception err:" + str(e))
         # print("Printing exception err:" + str(e))
-
     spark.stop()
 
 
@@ -66,15 +59,13 @@ async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
     sparkWrapper = SparkWrapper(
         APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
 
-    SRC_TABLE = 'default.trip_info'
-    TARGET_TABLE = 'default.trip_info_g'
     silver_to_gold(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
 
 
 if __name__ == "__main__":
     args = parse_args()
     asyncio.run(main(
-        args.spark_config_path,
         args.SRC_TABLE,
-        args.TARGET_TABLE
+        args.TARGET_TABLE,
+        args.spark_config_path
     ))

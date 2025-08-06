@@ -23,29 +23,29 @@ SPARK_CONFIG = {
 }
 
 with DAG(
-    dag_id="parquetfiles_to_bronze",
+    dag_id="silver_to_gold",
     start_date=datetime.datetime(2021, 1, 1),
-    description="A dag to load data from parquetfiles bucket to bronze table",
+    description="A dag to load data from silver to gold table",
     schedule="@daily",
     catchup=False,
     tags=["ingestion"],
     default_args=DEFAULT_ARGS,
 ) as dag:
     AIRFLOW_HOME = Path(Variable.get("AIRFLOW_HOME"))
-    app_path = AIRFLOW_HOME / "jobs" / "load" / "parquetfiles_to_bronze.py"
+    app_path = AIRFLOW_HOME / "jobs" / "load" / "silver_to_gold.py"
 
     # Cannot use inside taskflow API so we use context manager
     submit_job = SparkSubmitOperator(
         task_id="parquet_to_bronze",
         application=str(app_path.resolve()),
         application_args=[
-            "--SRC_TABLE", Variable.get("PARQUETFILES_PATH"),
-            "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
+            "--SRC_TABLE", Variable.get("SILVER_TABLE"),
+            "--TARGET_TABLE", Variable.get("GOLD_TABLE"),
             "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
         ],
         conf={
             'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
-            'spark.hadoop.fs.s3a.path.style.access': 'true'
+            'spark.hadoop.fs.s3a.path.style.access': 'true',
         },
         **SPARK_CONFIG
     )

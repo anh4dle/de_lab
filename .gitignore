@@ -6,3 +6,4 @@ airflow/data
 airflow/logs
 airflow/plugins
 jars
+.parquet

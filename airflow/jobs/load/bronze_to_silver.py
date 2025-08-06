@@ -1,10 +1,7 @@
-import os
 import asyncio
 import argparse
 import asyncio
 import pytz
-from utils.minio_utils import MinIOWrapper
-from jobs.extract.download_and_upload import extract_data
 from utils.spark_wrapper import SparkWrapper
 from utils.config_loader import ConfigLoader
 from utils.logger import logger
@@ -14,9 +11,7 @@ from pyspark.sql.functions import sha2, concat_ws
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
-def bronze_to_silver(sparkWrapper, SRC_TABLE, TARGET_TABLE):
-    spark = sparkWrapper.spark
-
+def bronze_to_silver(spark, SRC_TABLE, TARGET_TABLE):
     try:
         df_source = spark.read.table(SRC_TABLE)
         df_source = df_source.withColumnRenamed("tpep_pickup_datetime",
@@ -49,7 +44,7 @@ def bronze_to_silver(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         df_source.show(10)
         df_source.createOrReplaceTempView('SOURCE_TABLE')
 
-        update_cols = ', '.join(
+        update_cols_stmt = ', '.join(
             f"t.{col} = s.{col}" for col in df_source.columns
         )
 
@@ -58,7 +53,7 @@ def bronze_to_silver(sparkWrapper, SRC_TABLE, TARGET_TABLE):
         USING SOURCE_TABLE s
         ON t.trip_id = s.trip_id
         WHEN MATCHED THEN
-        UPDATE SET {update_cols}
+        UPDATE SET {update_cols_stmt}
         WHEN NOT MATCHED THEN INSERT *
         """
         spark.sql(SQL)
@@ -79,7 +74,7 @@ def parse_args():
 
 
 async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
-    APP_NAME = 'silver_to_gold'
+    APP_NAME = 'bronze_to_silver'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
 
@@ -88,15 +83,12 @@ async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
     sparkWrapper = SparkWrapper(
         APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
 
-    SRC_TABLE = 'default.taxi_raw'
-    TARGET_TABLE = 'default.trip_info'
     bronze_to_silver(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
 
 
 if __name__ == "__main__":
     args = parse_args()
     asyncio.run(main(
-        args.spark_config_path,
         args.SRC_TABLE,
-        args.TARGET_TABLE
-    ))
+        args.TARGET_TABLE,
+        args.spark_config_path))

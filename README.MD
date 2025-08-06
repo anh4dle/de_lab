@@ -25,6 +25,6 @@
 
 ## Todo:
 
-- Change schema read in for parquet to int
+- Why trino container turn off after etl? How to read trino log when it is down?
 - Add logger to parquetfiles -> bronze dag, test dag.
 - Data Quality Requirements.
