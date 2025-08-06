@@ -1,3 +1,4 @@
+from pyspark.sql.functions import col
 import asyncio
 import asyncio
 import pytz
@@ -5,18 +6,16 @@ from utils.spark_wrapper import SparkWrapper
 from utils.config_loader import ConfigLoader
 from utils.logger import logger
 import argparse
-
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
-
-
-def update_schema():
-    pass
 
 
 def etl_source_to_bronze(spark_session, OBJECT_PATH, TARGET_TABLE):
     try:
         df_source = spark_session.read.parquet(OBJECT_PATH)
+        df_source = df_source.drop(
+            df_source.airport_fee)
         df_source.createOrReplaceTempView('SOURCE_TABLE')
+
         update_cols = ', '.join(
             f"t.{col} = s.{col}" for col in df_source.columns
         )

@@ -25,7 +25,6 @@
 
 ## Todo:
 
-- Run the DAG and debug.
-- Missing hadoop dependencies --> look for the required jars
+- Change schema read in for parquet to int
 - Add logger to parquetfiles -> bronze dag, test dag.
 - Data Quality Requirements.

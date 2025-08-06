@@ -1,6 +1,7 @@
 import pyarrow.parquet as pq
 
 file_path = "yellow_tripdata_2020-04.parquet"  # or local path
+# file_path = "yellow_tripdata_2021-04.parquet"  # or local path
 # If s3, configure fs via s3fs
 table = pq.read_table(file_path)
 

@@ -18,9 +18,7 @@ CREATE TABLE iceberg.default.taxi_raw (
     tolls_amount DOUBLE,
     improvement_surcharge DOUBLE,
     total_amount DOUBLE,
-    congestion_surcharge DOUBLE,
-    airport_fee INTEGER
-)
+    congestion_surcharge DOUBLE)
 WITH (
 	location = 's3a://lake/raw/',
     format = 'PARQUET'
