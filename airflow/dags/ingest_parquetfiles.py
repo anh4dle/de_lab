@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import timedelta
 from airflow.decorators import dag, task
 import pendulum
-from jobs.extract.download_and_upload import submit_download_and_upload
+from jobs.download_and_upload import submit_download_and_upload
 from utils.minio_utils import MinIOWrapper
 from airflow.models import Variable
 import asyncio

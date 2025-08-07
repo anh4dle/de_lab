@@ -61,10 +61,12 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
     filename = download_url[last_dash + 1:]
     for attemp in range(retry_time + 1):
         try:
+            # Only upload if not exist
             minio_upload_path = Path(dir_path) / filename
             minio.create_bucket(bucket_name)
             minio.upload_stream_obj(bucket_name=bucket_name,
                                     object_name=minio_upload_path, data=data)
+            #Log
             return
         except Exception as e:
             log_failed(filename, str(e), csv_logger, 'upload')
@@ -79,6 +81,7 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
 async def download_and_upload(minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time, csv_logger):
     data = await download_file_as_stream(aiohttp_session, download_url, retry_time, csv_logger)
     await upload_to_minio(minio, bucket_name,  download_url, dir_path, data, retry_time, csv_logger)
+    # Log
 
 
 def convert_month_to_string(month):
@@ -113,6 +116,7 @@ async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_y
         current_year += 1
     async with aiohttp.ClientSession() as aiohttp_session:
         # Wrap coroutines in tasks
+        # Download if filename not existed
         tasks = [download_and_upload(minio, bucket_name, aiohttp_session, dir_path, url, retry_times, csv_logger)
                  for dir_path, url in urls]
         # Schedule and execute all tasks

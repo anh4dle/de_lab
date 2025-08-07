@@ -36,6 +36,7 @@ x-airflow-common: &airflow-common
     - ${AIRFLOW_PROJ_DIR:-./airflow}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-./airflow}/utils:/opt/airflow/utils
     - ${AIRFLOW_PROJ_DIR:-./airflow}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-./jars}:/opt/airflow/jars
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     redis:
@@ -66,7 +67,6 @@ services:
     volumes:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./jobs:/opt/bitnami/spark/jobs
       - ./airflow/utils/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
       - ./deps.zip:/opt/bitnami/spark/deps.zip
   spark-worker:
@@ -143,6 +143,10 @@ services:
     ports:
       - "8089:8080"
     image: "trinodb/trino:470"
+    deploy:
+      resources:
+        limits:
+          memory: 2g
     volumes:
       - ./infra/trino/etc:/usr/lib/trino/etc:ro
       - ./infra/trino/catalog:/etc/trino/catalog
