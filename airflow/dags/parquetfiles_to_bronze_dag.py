@@ -10,7 +10,7 @@ SPARK_CONFIG = {
     'conn_id': 'spark_conn',
     'total_executor_cores': '1',
     'executor_cores': '1',
-    'executor_memory': '4g',
+    'executor_memory': '2g',
     'driver_memory': '512m',
     'num_executors': '1',
 }
@@ -41,7 +41,7 @@ with DAG(
         ],
         conf={
             'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
-            'spark.hadoop.fs.s3a.path.style.access': 'true',
+            'spark.hadoop.fs.s3a.path.style.access': 'true'
         },
         **SPARK_CONFIG
     )

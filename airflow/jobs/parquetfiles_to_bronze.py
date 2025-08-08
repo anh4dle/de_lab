@@ -30,7 +30,7 @@ def etl_source_to_bronze(spark_session, OBJECT_PATH, TARGET_TABLE):
         """
         spark_session.sql(SQL)
     except Exception as e:
-        print("Printing exception err:", e)
+        logger.info(f"logging exception err: {e}")
     spark_session.stop()
 
 

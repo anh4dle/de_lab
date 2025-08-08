@@ -35,8 +35,8 @@ def silver_to_gold(spark, SRC_TABLE, TARGET_TABLE):
         """
         spark.sql(SQL)
     except Exception as e:
-        logger.error("Printing exception err:" + str(e))
-        # print("Printing exception err:" + str(e))
+        logger.error("logger.infoing exception err: " + str(e))
+
     spark.stop()
 
 

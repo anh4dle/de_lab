@@ -68,6 +68,7 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
             minio.upload_stream_obj(bucket_name=bucket_name,
                                     object_name=minio_upload_path, data=data)
             # Log
+            logger.info(f"Upload {filename} succeeded.")
             return True
         except Exception as e:
             log_failed(filename, str(e), csv_logger, 'upload')
@@ -120,10 +121,10 @@ async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_y
         filename = download_url[last_dash + 1:]
         trino_conn = get_trino_client()
         if not check_if_uploaded(trino_conn, filename):
-            print("inside check", urls)
+
             tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times, csv_logger)
                      for dir_path, url in urls]
             # Schedule and execute all tasks
             await asyncio.gather(*tasks)
         else:
-            print(filename, "file already uploaded")
+            logger.info(filename + "file already uploaded")

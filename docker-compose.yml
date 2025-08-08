@@ -50,6 +50,7 @@ services:
       dockerfile: Dockerfile.spark
     image: "bitnami/spark:3.5.0"
     container_name: spark-master
+    mem_limit: 2g
     # entrypoint: ["./entrypoint.sh", "master"]
     ports:
       - "8080:8080"
@@ -75,6 +76,7 @@ services:
       dockerfile: Dockerfile.spark
     image: "bitnami/spark:3.5.0"
     container_name: spark-worker
+    mem_limit: 6g
     # entrypoint: ["./entrypoint.sh", "worker"]
     depends_on:
       - spark-master
