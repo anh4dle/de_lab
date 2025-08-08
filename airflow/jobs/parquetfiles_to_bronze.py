@@ -46,6 +46,7 @@ async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
 
     etl_source_to_bronze(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--SRC_TABLE", required=True)

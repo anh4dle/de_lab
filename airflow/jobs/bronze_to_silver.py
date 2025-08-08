@@ -1,14 +1,12 @@
 import asyncio
 import argparse
 import asyncio
-import pytz
 from utils.spark_wrapper import SparkWrapper
 from utils.config_loader import ConfigLoader
 from utils.logger import logger
 from pyspark.sql.functions import sha2, concat_ws
 
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
-tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
 def bronze_to_silver(spark, SRC_TABLE, TARGET_TABLE):

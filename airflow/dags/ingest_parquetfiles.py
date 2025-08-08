@@ -9,7 +9,7 @@ import asyncio
 import csv
 
 DAG_ID = 'ingest_parquetfiles'
-CRON_SCHEDULE = "*/10 * * * *"
+CRON_SCHEDULE = "*/120 * * * *"
 TIMEZONE = "Asia/Ho_Chi_Minh"
 LOG_FILE_PATH = 'logs/failed_download.csv'
 # A dictionary contains config that applied to all tasks.

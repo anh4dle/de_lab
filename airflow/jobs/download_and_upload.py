@@ -7,6 +7,7 @@ from datetime import datetime
 import pytz
 import io
 from utils.logger import logger
+from utils.trino_utils import get_trino_client, check_if_uploaded, log_uploaded
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
@@ -66,8 +67,8 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
             minio.create_bucket(bucket_name)
             minio.upload_stream_obj(bucket_name=bucket_name,
                                     object_name=minio_upload_path, data=data)
-            #Log
-            return
+            # Log
+            return True
         except Exception as e:
             log_failed(filename, str(e), csv_logger, 'upload')
             logger.info(f'Failed to upload {filename}')
@@ -75,13 +76,16 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
             await asyncio.sleep(2)
         else:
             logger.info(f'Failed to upload {filename} after all attempts')
-            return
+    return False
 
 
-async def download_and_upload(minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time, csv_logger):
+async def download_and_upload(trino_conn, minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time, csv_logger):
     data = await download_file_as_stream(aiohttp_session, download_url, retry_time, csv_logger)
-    await upload_to_minio(minio, bucket_name,  download_url, dir_path, data, retry_time, csv_logger)
-    # Log
+    if await upload_to_minio(minio, bucket_name,  download_url, dir_path, data, retry_time, csv_logger):
+        last_dash = download_url.rfind("/")
+        filename = download_url[last_dash + 1:]
+        log_uploaded(trino_conn, filename)
+    # Log processed data
 
 
 def convert_month_to_string(month):
@@ -106,18 +110,20 @@ async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_y
             if month == 4:
                 month_str = convert_month_to_string(month)
                 download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
-                last_dash = download_url.rfind("/")
-                filename = download_url[last_dash + 1:]
-                filepath = f"parquetfiles/{str(current_year)}/{download_url[last_dash + 1:]}"
-                if filepath not in downloaded_files:
-                    logger.info(f"Downloading {filename}")
-                    urls.append((minio_upload_path, download_url))
+                urls.append((minio_upload_path, download_url))
             month += 1
         current_year += 1
     async with aiohttp.ClientSession() as aiohttp_session:
         # Wrap coroutines in tasks
         # Download if filename not existed
-        tasks = [download_and_upload(minio, bucket_name, aiohttp_session, dir_path, url, retry_times, csv_logger)
-                 for dir_path, url in urls]
-        # Schedule and execute all tasks
-        await asyncio.gather(*tasks)
+        last_dash = download_url.rfind("/")
+        filename = download_url[last_dash + 1:]
+        trino_conn = get_trino_client()
+        if not check_if_uploaded(trino_conn, filename):
+            print("inside check", urls)
+            tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times, csv_logger)
+                     for dir_path, url in urls]
+            # Schedule and execute all tasks
+            await asyncio.gather(*tasks)
+        else:
+            print(filename, "file already uploaded")

@@ -13,10 +13,11 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 USER airflow 
 
-COPY requirements.txt .
-
+COPY requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN pip uninstall -y pyspark
 RUN pip install pyspark==3.5.0
+
+RUN pip install trino
