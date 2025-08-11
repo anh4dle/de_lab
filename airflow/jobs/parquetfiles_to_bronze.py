@@ -19,11 +19,12 @@ def etl_source_to_bronze(spark_session, OBJECT_PATH, TARGET_TABLE):
         update_cols = ', '.join(
             f"t.{col} = s.{col}" for col in df_source.columns
         )
+        logger.info(f"Showing parquet rows count {df_source.count()}")
 
         SQL = f"""
         MERGE INTO {TARGET_TABLE} t
         USING SOURCE_TABLE s
-        ON t.tpep_pickup_datetime = s.tpep_pickup_datetime and t.tpep_dropoff_datetime = s.tpep_dropoff_datetime
+        ON t.tpep_pickup_datetime = s.tpep_pickup_datetime and t.tpep_dropoff_datetime = s.tpep_dropoff_datetime and t.total_amount = s.total_amount
         WHEN MATCHED THEN
         UPDATE SET {update_cols}
         WHEN NOT MATCHED THEN INSERT *
@@ -58,8 +59,13 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(main(
-        args.SRC_TABLE,
-        args.TARGET_TABLE,
-        args.spark_config_path,
-    ))
+    import sys
+    try:
+        asyncio.run(main(
+            args.SRC_TABLE,
+            args.TARGET_TABLE,
+            args.spark_config_path,
+        ))
+    except Exception as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)

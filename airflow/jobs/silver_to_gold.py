@@ -64,8 +64,13 @@ async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
 
 if __name__ == "__main__":
     args = parse_args()
-    asyncio.run(main(
-        args.SRC_TABLE,
-        args.TARGET_TABLE,
-        args.spark_config_path
-    ))
+    import sys
+    try:
+        asyncio.run(main(
+            args.SRC_TABLE,
+            args.TARGET_TABLE,
+            args.spark_config_path,
+        ))
+    except Exception as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)

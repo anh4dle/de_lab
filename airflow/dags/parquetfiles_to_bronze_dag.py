@@ -8,10 +8,10 @@ from airflow import DAG
 SPARK_CONFIG = {
     "jars": "/opt/airflow/jars/hadoop-aws-3.3.4.jar,/opt/airflow/jars/aws-java-sdk-bundle-1.12.262.jar,/opt/airflow/jars/iceberg-spark-runtime-3.4_2.12-1.5.2.jar",
     'conn_id': 'spark_conn',
-    'total_executor_cores': '1',
+    'total_executor_cores': '2',
     'executor_cores': '1',
     'executor_memory': '2g',
-    'driver_memory': '512m',
+    'driver_memory': '1g',
     'num_executors': '1',
 }
 

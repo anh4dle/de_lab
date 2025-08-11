@@ -25,5 +25,5 @@
 
 ## Todo:
 
-- Why trino container turn off after etl? How to read trino log when it is down? (docker ps -a | grep trino)
+- Run the whole pipeline with 1GB of Data on your window
 - Data Quality Requirements.
