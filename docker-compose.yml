@@ -18,9 +18,9 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-apiserver:8080/execution/"
     PYTHONPATH: "/opt/airflow"
-    MINIO_URL: http://minio:9000
-    MINIO_ROOT_USER: minioadmin
-    MINIO_ROOT_PASSWORD: minioadmin
+    MINIO_URL: ${MINIO_URL}
+    MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+    MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     HIVE_URL: thrift://hive-metastore:9083
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
@@ -51,7 +51,6 @@ services:
     image: "bitnami/spark:3.5.0"
     container_name: spark-master
     mem_limit: 2g
-    # entrypoint: ["./entrypoint.sh", "master"]
     ports:
       - "8080:8080"
       - "7077:7077"
@@ -61,9 +60,9 @@ services:
       SPARK_MASTER_WEBUI_PORT: 8080
       SPARK_MASTER_REST_PORT: 4040
       SPARK_HOME: /opt/bitnami/spark
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_USER}
+      MINIO_URL: ${MINIO_URL}
       HIVE_URL: thrift://hive-metastore:9083
     volumes:
       - spark-logs:/opt/spark/spark-events
@@ -83,16 +82,15 @@ services:
     volumes:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./jobs:/opt/bitnami/spark/jobs
       - ./airflow/utils/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
       - ./deps.zip:/opt/bitnami/spark/deps.zip
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077
       SPARK_HOME: /opt/bitnami/spark
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_URL: ${MINIO_URL}
       HIVE_URL: thrift://hive-metastore:9083
     command: start-worker.sh spark://spark-master:7077
   hive-metastore:
@@ -105,9 +103,9 @@ services:
       HIVE_METASTORE_JDBC_URL: jdbc:postgresql://postgres:5432/hive_metastore_db
       HIVE_METASTORE_USER: airflow
       HIVE_METASTORE_PASSWORD: airflow
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
+      S3_ENDPOINT: ${MINIO_URL}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       S3_PATH_STYLE_ACCESS: "true"
       # Below arguments exist for no reasons, but
       # we can not live without it
