@@ -18,23 +18,29 @@ def get_trino_client():
 
 
 def check_if_uploaded(trino_conn, fileName):
+    try:
+        sql_statement = f"SELECT count(*) FROM iceberg.default.log_table WHERE filename = '{fileName}' AND status = 'failed'"
+        cur = trino_conn.cursor()
+        cur.execute(sql_statement)
+        rows = cur.fetchall()[0][0]
 
-    sql_statement = f"SELECT count(*) FROM iceberg.default.uploaded_file WHERE fileName = '{fileName}'"
-    cur = trino_conn.cursor()
-    cur.execute(sql_statement)
-    rows = cur.fetchall()[0][0]
-
-    if rows == 0:
-        print("File not uploaded", fileName)
-        return False
-    return True
+        if rows == 0:
+            print("File not uploaded", fileName)
+            return False
+    except Exception as e:
+        print("Error checking if uploaded", e)
+        return True
 
 
 def log_status(trino_conn, fileName, download_url, status, timestamp, error):
-
-    sql_statement = f"INSERT INTO iceberg.default.uploaded_file VALUES ('{fileName}, {download_url}, {status}, {timestamp}, {error}')"
     cur = trino_conn.cursor()
-    cur.execute(sql_statement)
-    trino_conn.commit()
+    try:
 
-# def log_failed(trino_conn, fileName):
+        error_msg = error.replace("'", "''")  # escape single quotes for SQL
+
+        sql_statement = f"INSERT INTO iceberg.default.log_table VALUES ('{fileName}', '{download_url}', '{status}', TIMESTAMP '{timestamp}', '{error_msg}')"
+        print("printing statement", sql_statement)
+        cur.execute(sql_statement)
+        trino_conn.commit()
+    except Exception as e:
+        print("Error log status", e)

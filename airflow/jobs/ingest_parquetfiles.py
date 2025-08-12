@@ -42,14 +42,16 @@ async def download_file_as_stream(trino_conn, aiohttp_session, download_url, ret
                     data = await write_to_bytesIO(res)
                     return data
         except Exception as e:
+            logger.info(f'Failed to download {filename}')
+
             log_status(trino_conn, filename, download_url,
                        "failed", datetime.now(), str(e))
-            logger.info(f'Failed to download {filename}')
         if attemp < retry_time:
             await asyncio.sleep(2)
         else:
             logger.info(f'Failed to download {filename} after all attempts')
-            return
+
+    return
 
 
 async def upload_to_minio(trino_conn, minio: MinIOWrapper, bucket_name, download_url, dir_path, data, retry_time):
@@ -65,13 +67,14 @@ async def upload_to_minio(trino_conn, minio: MinIOWrapper, bucket_name, download
             logger.info(f"Upload {filename} succeeded.")
             return True
         except Exception as e:
+            logger.info(f'Failed to upload {filename}')
             log_status(trino_conn, filename, download_url,
                        "failed", datetime.now(), str(e))
-            logger.info(f'Failed to upload {filename}')
         if attemp < retry_time:
             await asyncio.sleep(2)
         else:
             logger.info(f'Failed to upload {filename} after all attempts')
+
     return False
 
 
@@ -94,26 +97,23 @@ async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket
     minio = MinIOWrapper(minio_url, minio_access, minio_pass)
     trino_conn = get_trino_client()
 
-    while current_year < end_year:
+    while current_year <= end_year:
         minio_upload_path = str(Path('parquetfiles') / str(current_year))
         month = 1
         downloaded_files = minio.get_downloaded_files_by_year(
             bucket_name, current_year)
         logger.info(f"Logging downloaded files {downloaded_files}")
         while month < 12:
-            # if month == 4:
             month_str = convert_month_to_string(month)
             download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
             urls.append((minio_upload_path, download_url))
             month += 1
         current_year += 1
     async with aiohttp.ClientSession() as aiohttp_session:
-        # Wrap coroutines in tasks
-        # Download if filename not existed
         last_dash = download_url.rfind("/")
         filename = download_url[last_dash + 1:]
         if not check_if_uploaded(trino_conn, filename):
-
+            # Wrap coroutines in tasks
             tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times)
                      for dir_path, url in urls]
             # Schedule and execute all tasks

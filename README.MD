@@ -25,5 +25,6 @@
 
 ## Todo:
 
-- Log fail download
+- Remove millisec.
+- Do we need separate dag to download error files
 - Data Quality Requirements.

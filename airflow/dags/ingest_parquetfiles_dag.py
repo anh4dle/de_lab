@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import timedelta
 from airflow.decorators import dag, task
 import pendulum
-from airflow.jobs.ingest_parquetfiles import submit_download_and_upload
+from jobs.ingest_parquetfiles import submit_download_and_upload
 from utils.minio_utils import MinIOWrapper
 from airflow.models import Variable
 import asyncio
@@ -11,7 +11,7 @@ import csv
 DAG_ID = 'ingest_parquetfiles'
 CRON_SCHEDULE = "*/120 * * * *"
 TIMEZONE = "Asia/Ho_Chi_Minh"
-# LOG_FILE_PATH = 'logs/failed_download.csv'
+
 # A dictionary contains config that applied to all tasks.
 DEFAULT_ARGS = {
     'owner': 'airflow',
@@ -33,7 +33,7 @@ def task_flow():
     @task
     def download():
         current_year = 2020
-        end_year = 2020
+        end_year = 2025
         bucket_name = 'lake'
         minio_url, minio_access, minio_pass = Variable.get("MINIO_URL"), Variable.get(
             "MINIO_ROOT_USER"), Variable.get("MINIO_ROOT_PASSWORD")
