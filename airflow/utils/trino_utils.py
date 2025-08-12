@@ -30,9 +30,11 @@ def check_if_uploaded(trino_conn, fileName):
     return True
 
 
-def log_uploaded(trino_conn, fileName):
+def log_status(trino_conn, fileName, download_url, status, timestamp, error):
 
-    sql_statement = f"INSERT INTO iceberg.default.uploaded_file VALUES ('{fileName}')"
+    sql_statement = f"INSERT INTO iceberg.default.uploaded_file VALUES ('{fileName}, {download_url}, {status}, {timestamp}, {error}')"
     cur = trino_conn.cursor()
     cur.execute(sql_statement)
     trino_conn.commit()
+
+# def log_failed(trino_conn, fileName):

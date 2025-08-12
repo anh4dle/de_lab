@@ -25,5 +25,5 @@
 
 ## Todo:
 
-- Run the whole pipeline with 1GB of Data on your window
+- Log fail download
 - Data Quality Requirements.

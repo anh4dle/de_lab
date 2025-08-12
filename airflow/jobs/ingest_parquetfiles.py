@@ -1,3 +1,4 @@
+from datetime import datetime
 import asyncio
 import aiohttp  # Use this instead of requests because it is non-blocking
 from pathlib import Path
@@ -7,16 +8,9 @@ from datetime import datetime
 import pytz
 import io
 from utils.logger import logger
-from utils.trino_utils import get_trino_client, check_if_uploaded, log_uploaded
+from utils.trino_utils import get_trino_client, check_if_uploaded, log_status
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
-
-
-def log_failed(filename, error, csv_logger, download_or_upload):
-    formatted_time = datetime.now(tz).strftime('%Y-%m-%d %H:%M:%S')
-    csv_logger.writerow([filename, error, formatted_time])
-    logger.info(
-        f'Cannot {download_or_upload} file {filename} because: {error}')
 
 
 def check_download_complete(total_bytes, res, filename):
@@ -35,7 +29,7 @@ async def write_to_bytesIO(response):
     return data
 
 
-async def download_file_as_stream(aiohttp_session, download_url, retry_time, csv_logger):
+async def download_file_as_stream(trino_conn, aiohttp_session, download_url, retry_time):
     last_dash = download_url.rfind("/")
     filename = download_url[last_dash + 1:]
 
@@ -48,7 +42,8 @@ async def download_file_as_stream(aiohttp_session, download_url, retry_time, csv
                     data = await write_to_bytesIO(res)
                     return data
         except Exception as e:
-            log_failed(filename, str(e), csv_logger, 'download')
+            log_status(trino_conn, filename, download_url,
+                       "failed", datetime.now(), str(e))
             logger.info(f'Failed to download {filename}')
         if attemp < retry_time:
             await asyncio.sleep(2)
@@ -57,7 +52,7 @@ async def download_file_as_stream(aiohttp_session, download_url, retry_time, csv
             return
 
 
-async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_path, data, retry_time, csv_logger):
+async def upload_to_minio(trino_conn, minio: MinIOWrapper, bucket_name, download_url, dir_path, data, retry_time):
     last_dash = download_url.rfind("/")
     filename = download_url[last_dash + 1:]
     for attemp in range(retry_time + 1):
@@ -67,11 +62,11 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
             minio.create_bucket(bucket_name)
             minio.upload_stream_obj(bucket_name=bucket_name,
                                     object_name=minio_upload_path, data=data)
-            # Log
             logger.info(f"Upload {filename} succeeded.")
             return True
         except Exception as e:
-            log_failed(filename, str(e), csv_logger, 'upload')
+            log_status(trino_conn, filename, download_url,
+                       "failed", datetime.now(), str(e))
             logger.info(f'Failed to upload {filename}')
         if attemp < retry_time:
             await asyncio.sleep(2)
@@ -80,13 +75,9 @@ async def upload_to_minio(minio: MinIOWrapper, bucket_name, download_url, dir_pa
     return False
 
 
-async def download_and_upload(trino_conn, minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time, csv_logger):
-    data = await download_file_as_stream(aiohttp_session, download_url, retry_time, csv_logger)
-    if await upload_to_minio(minio, bucket_name,  download_url, dir_path, data, retry_time, csv_logger):
-        last_dash = download_url.rfind("/")
-        filename = download_url[last_dash + 1:]
-        log_uploaded(trino_conn, filename)
-    # Log processed data
+async def download_and_upload(trino_conn, minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time):
+    data = await download_file_as_stream(trino_conn, aiohttp_session, download_url, retry_time)
+    await upload_to_minio(trino_conn, minio, bucket_name,  download_url, dir_path, data, retry_time)
 
 
 def convert_month_to_string(month):
@@ -97,9 +88,11 @@ def convert_month_to_string(month):
     return month
 
 
-async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_year, end_year, csv_logger):
+async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket_name, current_year, end_year):
     urls = []
     retry_times = 0
+    minio = MinIOWrapper(minio_url, minio_access, minio_pass)
+    trino_conn = get_trino_client()
 
     while current_year < end_year:
         minio_upload_path = str(Path('parquetfiles') / str(current_year))
@@ -108,10 +101,10 @@ async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_y
             bucket_name, current_year)
         logger.info(f"Logging downloaded files {downloaded_files}")
         while month < 12:
-            if month == 4:
-                month_str = convert_month_to_string(month)
-                download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
-                urls.append((minio_upload_path, download_url))
+            # if month == 4:
+            month_str = convert_month_to_string(month)
+            download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
+            urls.append((minio_upload_path, download_url))
             month += 1
         current_year += 1
     async with aiohttp.ClientSession() as aiohttp_session:
@@ -119,10 +112,9 @@ async def submit_download_and_upload(minio: MinIOWrapper, bucket_name, current_y
         # Download if filename not existed
         last_dash = download_url.rfind("/")
         filename = download_url[last_dash + 1:]
-        trino_conn = get_trino_client()
         if not check_if_uploaded(trino_conn, filename):
 
-            tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times, csv_logger)
+            tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times)
                      for dir_path, url in urls]
             # Schedule and execute all tasks
             await asyncio.gather(*tasks)
