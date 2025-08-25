@@ -7,4 +7,5 @@ airflow/logs
 airflow/plugins
 jars
 LESSONS.MD
+REQUIREMENTS.MD
 *.parquet
