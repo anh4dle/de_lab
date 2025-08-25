@@ -6,5 +6,5 @@ airflow/data
 airflow/logs
 airflow/plugins
 jars
-.parquet
 LESSONS.MD
+*.parquet
