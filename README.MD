@@ -25,6 +25,5 @@
 
 ## Todo:
 
-- Remove millisec.
-- Do we need separate dag to download error files
+- Install superset.
 - Data Quality Requirements.

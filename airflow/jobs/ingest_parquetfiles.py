@@ -42,14 +42,14 @@ async def download_file_as_stream(trino_conn, aiohttp_session, download_url, ret
                     data = await write_to_bytesIO(res)
                     return data
         except Exception as e:
-            logger.info(f'Failed to download {filename}')
+            logger.error(f'Failed to download {filename}')
 
             log_status(trino_conn, filename, download_url,
                        "failed", datetime.now(), str(e))
         if attemp < retry_time:
             await asyncio.sleep(2)
         else:
-            logger.info(f'Failed to download {filename} after all attempts')
+            logger.error(f'Failed to download {filename} after all attempts')
 
     return
 
@@ -67,13 +67,13 @@ async def upload_to_minio(trino_conn, minio: MinIOWrapper, bucket_name, download
             logger.info(f"Upload {filename} succeeded.")
             return True
         except Exception as e:
-            logger.info(f'Failed to upload {filename}')
+            logger.error(f'Failed to upload {filename}')
             log_status(trino_conn, filename, download_url,
                        "failed", datetime.now(), str(e))
         if attemp < retry_time:
             await asyncio.sleep(2)
         else:
-            logger.info(f'Failed to upload {filename} after all attempts')
+            logger.error(f'Failed to upload {filename} after all attempts')
 
     return False
 
@@ -103,7 +103,7 @@ async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket
         downloaded_files = minio.get_downloaded_files_by_year(
             bucket_name, current_year)
         logger.info(f"Logging downloaded files {downloaded_files}")
-        while month < 12:
+        while month <= 12:
             month_str = convert_month_to_string(month)
             download_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{current_year}-{month_str}.parquet"
             urls.append((minio_upload_path, download_url))
@@ -119,4 +119,4 @@ async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket
             # Schedule and execute all tasks
             await asyncio.gather(*tasks)
         else:
-            logger.info(filename + "file already uploaded")
+            logger.error(filename + "file already uploaded")

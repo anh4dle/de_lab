@@ -36,9 +36,17 @@ def log_status(trino_conn, fileName, download_url, status, timestamp, error):
     cur = trino_conn.cursor()
     try:
 
-        error_msg = error.replace("'", "''")  # escape single quotes for SQL
-
-        sql_statement = f"INSERT INTO iceberg.default.log_table VALUES ('{fileName}', '{download_url}', '{status}', TIMESTAMP '{timestamp}', '{error_msg}')"
+        error_msg = error.replace("'", "''")
+        sql_statement = f"""
+        INSERT INTO iceberg.default.log_table (filename, download_url, status, updated_date, error)
+        SELECT '{fileName}', '{download_url}', '{status}', TIMESTAMP '{timestamp}', '{error_msg}'
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM iceberg.default.log_table t
+            WHERE t.filename = '{fileName}'
+        )
+        """
+        # sql_statement = f"INSERT INTO iceberg.default.log_table VALUES ('{fileName}', '{download_url}', '{status}', TIMESTAMP '{timestamp}', '{error_msg}')"
         print("printing statement", sql_statement)
         cur.execute(sql_statement)
         trino_conn.commit()
