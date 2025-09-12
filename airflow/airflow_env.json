@@ -7,7 +7,7 @@
     "SPARK_CONFIG_PATH":"/opt/airflow/utils/spark_config_prod.yaml",
     "SPARK_HOME":"/opt/bitnami/spark",
     "PARQUETFILES_PATH":"s3a://lake/parquetfiles/",
-    "BRONZE_TABLE":"default.taxi_raw",
-    "SILVER_TABLE":"default.trip_info",
+    "BRONZE_TABLE":"default.trip_info_b",
+    "SILVER_TABLE":"default.trip_info_s",
     "GOLD_TABLE":"default.trip_info_g"
 }

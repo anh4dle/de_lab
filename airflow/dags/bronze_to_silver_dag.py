@@ -38,8 +38,8 @@ with DAG(
         conf={
             'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
             'spark.hadoop.fs.s3a.path.style.access': 'true',
-            'spark.local.dir': '/opt/bitnami/spark/custom-jars/tmp'
-
+            # 'spark.local.dir': '/opt/bitnami/spark/custom-jars/tmp'
+            # 'spark.local.dir': '/opt/bitnami/spark/tmp'
         },
         **SPARK_CONFIG
 

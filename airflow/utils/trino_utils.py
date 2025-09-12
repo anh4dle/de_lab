@@ -1,4 +1,5 @@
 from trino.dbapi import connect
+from utils.logger import logger
 
 
 def get_trino_client():
@@ -25,10 +26,13 @@ def check_if_uploaded(trino_conn, fileName):
         rows = cur.fetchall()[0][0]
 
         if rows == 0:
-            print("File not uploaded", fileName)
+            # print("File not uploaded", fileName)
+            logger.error(f"File not uploaded {fileName}")
             return False
     except Exception as e:
-        print("Error checking if uploaded", e)
+        # print("Error checking if uploaded", e)
+        logger.error(f"Error checking if uploaded {e}")
+
         return True
 
 
@@ -38,7 +42,7 @@ def log_status(trino_conn, fileName, download_url, status, timestamp, error):
 
         error_msg = error.replace("'", "''")
         sql_statement = f"""
-        INSERT INTO iceberg.default.log_table (filename, download_url, status, updated_date, error)
+        INSERT INTO iceberg.default.log_table (filename, downloadurl, status, updated_date, error)
         SELECT '{fileName}', '{download_url}', '{status}', TIMESTAMP '{timestamp}', '{error_msg}'
         WHERE NOT EXISTS (
             SELECT 1
@@ -47,7 +51,8 @@ def log_status(trino_conn, fileName, download_url, status, timestamp, error):
         )
         """
         # sql_statement = f"INSERT INTO iceberg.default.log_table VALUES ('{fileName}', '{download_url}', '{status}', TIMESTAMP '{timestamp}', '{error_msg}')"
-        print("printing statement", sql_statement)
+        # print("printing statement", sql_statement)
+        logger.info(f"Logging statement: {sql_statement}")
         cur.execute(sql_statement)
         trino_conn.commit()
     except Exception as e:

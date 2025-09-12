@@ -67,12 +67,11 @@ def etl_source_to_bronze(spark_session, df_source, TARGET_TABLE):
     spark_session.stop()
 
 
-# Should have postgres client to insert log
 async def main(year, TARGET_TABLE, SPARK_CONFIG_PATH):
     APP_NAME = 'parquet_to_bronze'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
-
+    # TODO: add env instead
     MINIO_URL = "minio:9000"
     MINIO_ROOT_USER = "minioadmin"
     MINIO_ROOT_PASSWORD = "minioadmin"

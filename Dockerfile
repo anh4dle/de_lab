@@ -21,3 +21,5 @@ RUN pip uninstall -y pyspark
 RUN pip install pyspark==3.5.0
 
 RUN pip install trino
+
+

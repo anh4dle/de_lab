@@ -33,7 +33,7 @@ def task_flow():
     @task
     def download():
         current_year = 2015
-        end_year = 2019
+        end_year = 2017
         bucket_name = 'lake'
         minio_url, minio_access, minio_pass = Variable.get("MINIO_URL"), Variable.get(
             "MINIO_ROOT_USER"), Variable.get("MINIO_ROOT_PASSWORD")

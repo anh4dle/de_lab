@@ -37,7 +37,7 @@ with DAG(
     for i, folder in enumerate(folders):
         print("Inside spark submit")
         submit_job = SparkSubmitOperator(
-            task_id=f"parquet_to_bronze_{i}",
+            task_id=f"parquet_to_bronze_{folder}",
             application=str(app_path.resolve()),
             application_args=[
                 # "--SRC_TABLE", Variable.get("PARQUETFILES_PATH"),

@@ -1,5 +1,6 @@
 from datetime import datetime
 import asyncio
+import traceback
 import aiohttp  # Use this instead of requests because it is non-blocking
 from pathlib import Path
 from utils.logger import logger
@@ -11,6 +12,9 @@ from utils.logger import logger
 from utils.trino_utils import get_trino_client, check_if_uploaded, log_status
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
+MAX_CONCURRENT = 8
+# Allows up to 3 concurrent acquisitions
+semaphore = asyncio.Semaphore(value=MAX_CONCURRENT)
 
 
 def check_download_complete(total_bytes, res, filename):
@@ -22,7 +26,7 @@ def check_download_complete(total_bytes, res, filename):
 
 
 async def write_to_bytesIO(response):
-    data = io.BytesIO()
+    data = io.BytesIO()  # An array of bytes
     async for chunk in response.content.iter_chunked(1024):
         data.write(chunk)
     data.seek(0)
@@ -42,15 +46,16 @@ async def download_file_as_stream(trino_conn, aiohttp_session, download_url, ret
                     data = await write_to_bytesIO(res)
                     return data
         except Exception as e:
-            logger.error(f'Failed to download {filename}')
+            error_msg = traceback.format_exc()
 
+            print("printing error", str(e))
+            logger.exception('Failed to download {filename}')
             log_status(trino_conn, filename, download_url,
-                       "failed", datetime.now(), str(e))
+                       "failed", datetime.now(), error_msg)
         if attemp < retry_time:
             await asyncio.sleep(2)
         else:
             logger.error(f'Failed to download {filename} after all attempts')
-
     return
 
 
@@ -74,13 +79,13 @@ async def upload_to_minio(trino_conn, minio: MinIOWrapper, bucket_name, download
             await asyncio.sleep(2)
         else:
             logger.error(f'Failed to upload {filename} after all attempts')
-
     return False
 
 
 async def download_and_upload(trino_conn, minio: MinIOWrapper, bucket_name, aiohttp_session, dir_path, download_url, retry_time):
-    data = await download_file_as_stream(trino_conn, aiohttp_session, download_url, retry_time)
-    await upload_to_minio(trino_conn, minio, bucket_name,  download_url, dir_path, data, retry_time)
+    async with semaphore:  # Use semaphore to limit number of concurrent task
+        data = await download_file_as_stream(trino_conn, aiohttp_session, download_url, retry_time)
+        await upload_to_minio(trino_conn, minio, bucket_name,  download_url, dir_path, data, retry_time)
 
 
 def convert_month_to_string(month):
@@ -91,12 +96,8 @@ def convert_month_to_string(month):
     return month
 
 
-async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket_name, current_year, end_year):
+def create_download_list(minio, bucket_name, current_year, end_year):
     urls = []
-    retry_times = 0
-    minio = MinIOWrapper(minio_url, minio_access, minio_pass)
-    trino_conn = get_trino_client()
-
     while current_year <= end_year:
         minio_upload_path = str(Path('parquetfiles') / str(current_year))
         month = 1
@@ -109,14 +110,27 @@ async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket
             urls.append((minio_upload_path, download_url))
             month += 1
         current_year += 1
-    async with aiohttp.ClientSession() as aiohttp_session:
-        last_dash = download_url.rfind("/")
-        filename = download_url[last_dash + 1:]
-        if not check_if_uploaded(trino_conn, filename):
+    return {'urls': urls, 'download_url_template': download_url}
+
+
+async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket_name, current_year, end_year):
+    urls = []
+    retry_times = 0
+    minio = MinIOWrapper(minio_url, minio_access, minio_pass)
+    trino_conn = get_trino_client()
+
+    urls, download_url = create_download_list(minio, bucket_name, current_year, end_year)[
+        'urls'], create_download_list(minio, bucket_name, current_year, end_year)['download_url_template']
+
+    last_dash = download_url.rfind("/")
+    filename = download_url[last_dash + 1:]
+    if not check_if_uploaded(trino_conn, filename):
+        # Use context manager to manage resource lifecycle automatically and client session to reuse the established TCP connection
+        async with aiohttp.ClientSession() as aiohttp_session:
             # Wrap coroutines in tasks
             tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times)
                      for dir_path, url in urls]
             # Schedule and execute all tasks
             await asyncio.gather(*tasks)
-        else:
-            logger.error(filename + "file already uploaded")
+    else:
+        logger.error(filename + "file already uploaded")

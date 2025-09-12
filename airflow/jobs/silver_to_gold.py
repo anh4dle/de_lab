@@ -13,7 +13,7 @@ def silver_to_gold(spark, SRC_TABLE, TARGET_TABLE):
         query = """
         select trip_id as id, year(dropoff_datetime) as year, month(dropoff_datetime) as month,
         day(dropoff_datetime) as day, sum(total_amount) as total_revenue
-        from iceberg.default.trip_info
+        from iceberg.default.trip_info_s
         group by year(dropoff_datetime), month(dropoff_datetime), day(dropoff_datetime), trip_id
         LIMIT 10
         """

@@ -1,6 +1,6 @@
 --Create iceberg table for raw layer
-DROP TABLE IF EXISTS iceberg.default.trip_info;
-CREATE TABLE iceberg.default.trip_info (
+DROP TABLE IF EXISTS iceberg.default.trip_info_s;
+CREATE TABLE iceberg.default.trip_info_s (
     VendorID INT,
     pickup_datetime TIMESTAMP(0),
     dropoff_datetime TIMESTAMP(0),
@@ -12,5 +12,5 @@ CREATE TABLE iceberg.default.trip_info (
     trip_id VARCHAR
 )
 WITH (
-	location = 's3a://lake/silver/trip_info'
+	location = 's3a://lake/silver/'
 );

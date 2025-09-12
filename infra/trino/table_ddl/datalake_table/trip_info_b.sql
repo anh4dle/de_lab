@@ -1,6 +1,6 @@
 --Create iceberg table for raw layer
-DROP TABLE IF EXISTS iceberg.default.taxi_raw;
-CREATE TABLE iceberg.default.taxi_raw (
+DROP TABLE IF EXISTS iceberg.default.trip_info_b;
+CREATE TABLE iceberg.default.trip_info_b (
     VendorID BIGINT,
     tpep_pickup_datetime TIMESTAMP(0),
     tpep_dropoff_datetime TIMESTAMP(0),
@@ -20,6 +20,6 @@ CREATE TABLE iceberg.default.taxi_raw (
     total_amount DOUBLE,
     congestion_surcharge DOUBLE)
 WITH (
-	location = 's3a://lake/raw/',
+	location = 's3a://lake/bronze/',
     format = 'PARQUET'
 );
