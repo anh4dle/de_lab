@@ -2,8 +2,9 @@ from pathlib import Path
 import datetime
 from airflow.models import Variable
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
-from airflow import DAG
+from airflow import DAG, Dataset
 
+silver_table = Dataset("s3:silver_table")
 
 SPARK_CONFIG = {
     "jars": "/opt/airflow/jars/hadoop-aws-3.3.4.jar,/opt/airflow/jars/aws-java-sdk-bundle-1.12.262.jar,/opt/airflow/jars/iceberg-spark-runtime-3.4_2.12-1.5.2.jar",
@@ -19,9 +20,10 @@ with DAG(
     dag_id="silver_to_gold",
     start_date=datetime.datetime(2021, 1, 1),
     description="A dag to load data from silver to gold table",
-    # schedule="@daily",
+    schedule=[silver_table],
     catchup=False,
-    tags=["ingestion"],
+    tags=["ingestion"]
+
 ) as dag:
     AIRFLOW_HOME = Path(Variable.get("AIRFLOW_HOME"))
     app_path = AIRFLOW_HOME / "jobs" / "silver_to_gold.py"
