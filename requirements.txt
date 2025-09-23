@@ -29,3 +29,7 @@ yarl==1.20.1
 apache-airflow-providers-apache-spark
 pyspark==3.5.0
 trino
+black 
+flake8 
+mypy 
+isort 

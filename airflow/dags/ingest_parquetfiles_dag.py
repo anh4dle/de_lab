@@ -5,6 +5,9 @@ import pendulum
 from jobs.ingest_parquetfiles import submit_download_and_upload
 from airflow.models import Variable
 import asyncio
+from airflow import Dataset
+
+parquet_files = Dataset("s3:parquet_files")
 
 DAG_ID = 'ingest_parquetfiles'
 CRON_SCHEDULE = "*/120 * * * *"

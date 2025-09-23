@@ -181,6 +181,7 @@ services:
   airflow-apiserver:
     <<: *airflow-common
     command: webserver
+    container_name: webserver
     ports:
       - "8086:8080"
     healthcheck:

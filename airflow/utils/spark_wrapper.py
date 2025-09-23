@@ -19,6 +19,7 @@ class SparkWrapper:
         # builder = builder.config("spark.jars", v)
 
         return builder.getOrCreate()
+    # TODO: Keep spark config dict or no?
 
     def print_config(self):
         for k, v in self.spark.sparkContext.getConf().getAll():

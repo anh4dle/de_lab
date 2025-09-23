@@ -28,7 +28,7 @@ with DAG(
     AIRFLOW_HOME = Path(Variable.get("AIRFLOW_HOME"))
     app_path = AIRFLOW_HOME / "jobs" / "bronze_to_silver.py"
 
-    # Cannot use inside taskflow API so we use context manager
+    # Cannot use SparkSubmitOperator inside taskflow API so we use context manager
     submit_job = SparkSubmitOperator(
         task_id="parquet_to_bronze",
         application=str(app_path.resolve()),
