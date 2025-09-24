@@ -2,8 +2,9 @@ from pyspark.sql.functions import col
 import asyncio
 import asyncio
 import pytz
+import os
 from utils.spark_wrapper import SparkWrapper
-from utils.config_loader import ConfigLoader
+
 from utils.logger import logger
 import argparse
 from pyspark.sql.types import *
@@ -46,21 +47,20 @@ def etl_source_to_bronze(spark_session, df_source, TARGET_TABLE):
     spark_session.stop()
 
 
-async def main(year, TARGET_TABLE, SPARK_CONFIG_PATH):
+async def main(year, TARGET_TABLE):
     APP_NAME = 'parquet_to_bronze'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
     # TODO: add env instead
-    MINIO_URL = "minio:9000"
-    MINIO_ROOT_USER = "minioadmin"
-    MINIO_ROOT_PASSWORD = "minioadmin"
+    MINIO_URL = os.getenv("MINIO_URL")
+    MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
+    MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
     minio_client = MinIOWrapper(
         MINIO_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD)
-    config = ConfigLoader(SPARK_CONFIG_PATH)
-    spark_config_dict = config.get_yaml_config_dict()
+
     sparkWrapper = SparkWrapper(
-        APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
-    # Leave MinIO here and read file by file
+        APP_NAME, CATALOG_NAME, DB_NAME)
+
     file_names = minio_client.get_downloaded_files_by_year("lake", year)
 
     for file_name in file_names:
@@ -73,7 +73,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--SRC_TABLE", required=True)
     parser.add_argument("--TARGET_TABLE", required=True)
-    parser.add_argument("--spark_config_path", required=True)
+
     args = parser.parse_args()
     return args
 
@@ -84,8 +84,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main(
             args.SRC_TABLE,
-            args.TARGET_TABLE,
-            args.spark_config_path,
+            args.TARGET_TABLE
         ))
     except Exception as e:
         print(e, file=sys.stderr)

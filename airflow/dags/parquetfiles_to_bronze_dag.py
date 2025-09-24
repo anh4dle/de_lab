@@ -3,9 +3,9 @@ from pathlib import Path
 from airflow.models import Variable
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow import DAG, Dataset
-
+import datetime
 from airflow.operators.empty import EmptyOperator
-
+from utils.config_loader import ConfigLoader
 bronze_table = Dataset("s3:bronze_table")
 parquet_files = Dataset("s3:parquet_files")
 
@@ -20,7 +20,10 @@ SPARK_CONFIG = {
 }
 
 AIRFLOW_HOME = Path(Variable.get("AIRFLOW_HOME"))
-
+# HIVE_URL = Variable.get("HIVE_URL")
+# MINIO_URL = "http://" + Variable.get("MINIO_URL")
+# MINIO_ROOT_USER = Variable.get("MINIO_ROOT_USER")
+# MINIO_ROOT_PASSWORD = Variable.get("MINIO_ROOT_PASSWORD")
 app_path = AIRFLOW_HOME / "jobs" / "parquetfiles_to_bronze.py"
 
 
@@ -29,6 +32,7 @@ with DAG(
     description="A dag to load data from parquetfiles bucket to bronze table",
     schedule=[parquet_files],
     catchup=False,
+    start_date=datetime.datetime(2021, 1, 1),
     tags=["ingestion"],
     params={"folders": [2015]},
 ) as dag:
@@ -36,20 +40,28 @@ with DAG(
     end_task = EmptyOperator(
         task_id="start_task", outlets=[bronze_table]
     )
+    config = ConfigLoader()
+    spark_config = config.get_spark_config()
     for i, folder in enumerate(dag.params["folders"]):
         submit_job = SparkSubmitOperator(
             task_id=f"parquet_to_bronze_{folder}",
             application=str(app_path.resolve()),
             application_args=[
                 "--SRC_TABLE", str(folder),
-                "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
-                "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
+                "--TARGET_TABLE", Variable.get("BRONZE_TABLE")
             ],
-            conf={
-                'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
-                'spark.hadoop.fs.s3a.path.style.access': 'true',
-                'spark.sql.parquet.enableVectorizedReader': "false"
-            },
+            # conf={
+            #     'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
+            #     'spark.hadoop.fs.s3a.path.style.access': 'true',
+            #     'spark.sql.parquet.enableVectorizedReader': "false",
+            #     'spark.sql.catalog.iceberg': 'org.apache.iceberg.spark.SparkCatalog',
+            #     'spark.sql.catalog.iceberg.type': "hive",
+            #     'spark.sql.catalog.iceberg.uri': HIVE_URL,
+            #     'spark.hadoop.fs.s3a.endpoint': MINIO_URL,
+            #     'spark.hadoop.fs.s3a.access.key': MINIO_ROOT_USER,
+            #     'spark.hadoop.fs.s3a.secret.key': MINIO_ROOT_PASSWORD
+            # },
+            conf=spark_config,
             **SPARK_CONFIG
         )
         if previous_task:

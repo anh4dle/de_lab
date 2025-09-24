@@ -34,9 +34,7 @@ with DAG(
         application=str(app_path.resolve()),
         application_args=[
             "--SRC_TABLE", Variable.get("SILVER_TABLE"),
-            "--TARGET_TABLE", Variable.get("GOLD_TABLE"),
-            "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
-        ],
+            "--TARGET_TABLE", Variable.get("GOLD_TABLE")],
         conf={
             'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
             'spark.hadoop.fs.s3a.path.style.access': 'true',

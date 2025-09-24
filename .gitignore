@@ -6,7 +6,5 @@ airflow/data
 airflow/logs
 airflow/plugins
 jars
-LESSONS.MD
-REQUIREMENTS.MD
 *.parquet
-TODO.MD
+personal_notes

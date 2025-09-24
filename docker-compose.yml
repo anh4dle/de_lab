@@ -67,7 +67,6 @@ services:
     volumes:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./airflow/utils/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
       - ./deps.zip:/opt/bitnami/spark/deps.zip
   spark-worker:
     build:
@@ -82,7 +81,7 @@ services:
     volumes:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./airflow/utils/spark_config_prod.yaml:/opt/bitnami/spark/spark_config_prod.yaml
+
       - ./deps.zip:/opt/bitnami/spark/deps.zip
     environment:
       SPARK_MODE: worker

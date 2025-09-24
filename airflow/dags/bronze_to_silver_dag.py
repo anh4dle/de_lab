@@ -34,8 +34,7 @@ with DAG(
         application=str(app_path.resolve()),
         application_args=[
             "--SRC_TABLE", Variable.get("BRONZE_TABLE"),
-            "--TARGET_TABLE", Variable.get("SILVER_TABLE"),
-            "--spark_config_path", Variable.get("SPARK_CONFIG_PATH"),
+            "--TARGET_TABLE", Variable.get("SILVER_TABLE")
         ],
         outlets=[silver_table],
         conf={

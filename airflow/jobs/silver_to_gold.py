@@ -1,6 +1,5 @@
 import asyncio
 from utils.spark_wrapper import SparkWrapper
-from utils.config_loader import ConfigLoader
 from utils.logger import logger
 import argparse
 
@@ -44,20 +43,18 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--SRC_TABLE", required=True)
     parser.add_argument("--TARGET_TABLE", required=True)
-    parser.add_argument("--spark_config_path", required=True)
+
     args = parser.parse_args()
     return args
 
 
-async def main(SRC_TABLE, TARGET_TABLE, SPARK_CONFIG_PATH):
+async def main(SRC_TABLE, TARGET_TABLE):
     APP_NAME = 'silver_to_gold'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
 
-    config = ConfigLoader(SPARK_CONFIG_PATH)
-    spark_config_dict = config.get_yaml_config_dict()
     sparkWrapper = SparkWrapper(
-        APP_NAME, spark_config_dict, CATALOG_NAME, DB_NAME)
+        APP_NAME, CATALOG_NAME, DB_NAME)
 
     silver_to_gold(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
 
@@ -68,8 +65,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main(
             args.SRC_TABLE,
-            args.TARGET_TABLE,
-            args.spark_config_path,
+            args.TARGET_TABLE
         ))
     except Exception as e:
         print(e, file=sys.stderr)

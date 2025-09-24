@@ -13,4 +13,6 @@ lint:
 ci: isort format type lint
 
  
- 
+
+restart:
+	docker compose down && sleep 5 && docker compose up
