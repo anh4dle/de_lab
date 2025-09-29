@@ -1,17 +1,15 @@
 
 from datetime import timedelta
-from airflow.decorators import dag, task
+
+from airflow.operators.python import PythonOperator
+
 import pendulum
 from jobs.ingest_parquetfiles import submit_download_and_upload
 from airflow.models import Variable
 import asyncio
-from airflow import Dataset
 
-parquet_files = Dataset("s3:parquet_files")
+from airflow import DAG
 
-DAG_ID = 'ingest_parquetfiles'
-CRON_SCHEDULE = "*/120 * * * *"
-TIMEZONE = "Asia/Ho_Chi_Minh"
 
 # A dictionary contains config that applied to all tasks.
 DEFAULT_ARGS = {
@@ -21,28 +19,31 @@ DEFAULT_ARGS = {
 }
 
 
-@dag(
-    DAG_ID,
-    schedule=CRON_SCHEDULE,
+def download(**context):
+    start_year = context["params"]["start_year"]
+    end_year = context["params"]["end_year"]
+    bucket_name = 'lake'
+    minio_url, minio_access, minio_pass = Variable.get("MINIO_URL"), Variable.get(
+        "MINIO_ROOT_USER"), Variable.get("MINIO_ROOT_PASSWORD")
+
+    asyncio.run(submit_download_and_upload(minio_url, minio_access,
+                                           minio_pass, bucket_name, start_year, end_year))
+
+
+with DAG(
+    dag_id='ingest_parquetfiles',
+    schedule="*/120 * * * *",
     description='A DAG to download taxi data files and upload to bucket parquetfiles on minio',
     default_args=DEFAULT_ARGS,
     catchup=False,
     dagrun_timeout=timedelta(minutes=20),
     max_consecutive_failed_dag_runs=2,
     params={"start_year": 2012, "end_year": 2014}
-)
-def task_flow():
-    @task
-    def download(**context):
-        start_year = context["params"]["start_year"]
-        end_year = context["params"]["end_year"]
-        bucket_name = 'lake'
-        minio_url, minio_access, minio_pass = Variable.get("MINIO_URL"), Variable.get(
-            "MINIO_ROOT_USER"), Variable.get("MINIO_ROOT_PASSWORD")
+) as dag:
 
-        asyncio.run(submit_download_and_upload(minio_url, minio_access,
-                    minio_pass, bucket_name, start_year, end_year))
-    download()
-
-
-dag = task_flow()
+    download_task = PythonOperator(
+        task_id="download_taxi_data",
+        python_callable=download,
+        provide_context=True,
+    )
+    download_task

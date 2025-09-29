@@ -67,7 +67,7 @@ services:
     volumes:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
-      - ./deps.zip:/opt/bitnami/spark/deps.zip
+      # - ./deps.zip:/opt/bitnami/spark/deps.zip
   spark-worker:
     build:
       context: .
@@ -82,7 +82,7 @@ services:
       - spark-logs:/opt/spark/spark-events
       - ./jars/:/opt/bitnami/spark/custom-jars
 
-      - ./deps.zip:/opt/bitnami/spark/deps.zip
+      # - ./deps.zip:/opt/bitnami/spark/deps.zip
     environment:
       SPARK_MODE: worker
       SPARK_MASTER_URL: spark://spark-master:7077

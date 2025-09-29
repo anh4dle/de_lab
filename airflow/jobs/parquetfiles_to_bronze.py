@@ -48,6 +48,7 @@ def etl_source_to_bronze(spark_session, df_source, TARGET_TABLE):
 
 
 async def main(year, TARGET_TABLE):
+    # Tight coupling
     APP_NAME = 'parquet_to_bronze'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
