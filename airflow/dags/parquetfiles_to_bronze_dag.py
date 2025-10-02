@@ -6,8 +6,8 @@ from airflow import DAG, Dataset
 import datetime
 from airflow.operators.empty import EmptyOperator
 from utils.config_loader import ConfigLoader
-
-SPARK_CONFIG = {
+from utils.minio_utils import MinIOWrapper
+SPARK_DRIVER_CONFIG = {
     "jars": "/opt/airflow/jars/hadoop-aws-3.3.4.jar,/opt/airflow/jars/aws-java-sdk-bundle-1.12.262.jar,/opt/airflow/jars/iceberg-spark-runtime-3.4_2.12-1.5.2.jar",
     'conn_id': 'spark_conn',
     'total_executor_cores': '1',
@@ -21,8 +21,10 @@ bronze_table = Dataset("s3:bronze_table")
 parquet_files = Dataset("s3:parquet_files")
 AIRFLOW_HOME = Path(Variable.get("AIRFLOW_HOME"))
 app_path = AIRFLOW_HOME / "jobs" / "parquetfiles_to_bronze.py"
+MINIO_URL = Variable.get("MINIO_URL")
+MINIO_ROOT_USER = Variable.get("MINIO_ROOT_USER")
+MINIO_ROOT_PASSWORD = Variable.get("MINIO_ROOT_PASSWORD")
 
-# TODO: refactor dag
 
 # Init dag params
 with DAG(
@@ -42,6 +44,7 @@ with DAG(
     # Get dependency
     config = ConfigLoader()
     spark_config = config.get_spark_config()
+
     # Create task
     for i, folder in enumerate(dag.params["folders"]):
         submit_job = SparkSubmitOperator(
@@ -49,10 +52,13 @@ with DAG(
             application=str(app_path.resolve()),
             application_args=[
                 "--SRC_TABLE", str(folder),
-                "--TARGET_TABLE", Variable.get("BRONZE_TABLE")
+                "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
+                "--MINIO_URL", MINIO_URL,
+                "--MINIO_ROOT_USER", MINIO_ROOT_USER,
+                "--MINIO_ROOT_PASSWORD", MINIO_ROOT_PASSWORD
             ],
             conf=spark_config,
-            **SPARK_CONFIG
+            **SPARK_DRIVER_CONFIG
         )
         # Schedule
         if previous_task:

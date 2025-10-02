@@ -9,7 +9,7 @@ from pyspark.sql.functions import sha2, concat_ws
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 
 
-def bronze_to_silver(spark, SRC_TABLE, TARGET_TABLE):
+def transform(spark, SRC_TABLE):
     try:
         df_source = spark.read.table(SRC_TABLE)
         df_source = df_source.withColumnRenamed("tpep_pickup_datetime",
@@ -39,7 +39,14 @@ def bronze_to_silver(spark, SRC_TABLE, TARGET_TABLE):
                            "total_amount",
                            ), 256)
         )
-        df_source.show(10)
+        return df_source
+    except Exception as e:
+        logger.error(f"logging exception err: {str(e)}")
+        raise
+
+
+def load(spark, df_source, TARGET_TABLE):
+    try:
         df_source.createOrReplaceTempView('SOURCE_TABLE')
 
         update_cols_stmt = ', '.join(
@@ -57,7 +64,7 @@ def bronze_to_silver(spark, SRC_TABLE, TARGET_TABLE):
         spark.sql(SQL)
     except Exception as e:
         logger.error(f"logging exception err: {str(e)}")
-    spark.stop()
+        raise
 
 
 def parse_args():
@@ -77,8 +84,11 @@ async def main(SRC_TABLE, TARGET_TABLE):
 
     sparkWrapper = SparkWrapper(
         APP_NAME, CATALOG_NAME, DB_NAME)
+    spark_session = sparkWrapper.spark
+    transformed_df = transform(spark_session, SRC_TABLE)
+    load(spark_session, transformed_df, TARGET_TABLE)
 
-    bronze_to_silver(sparkWrapper.spark, SRC_TABLE, TARGET_TABLE)
+    spark_session.stop()
 
 
 if __name__ == "__main__":

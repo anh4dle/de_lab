@@ -14,7 +14,6 @@ tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
 def read_parquet(spark_session, OBJECT_PATH):
-    # List files, read, cast, union
     try:
         df_source = spark_session.read.parquet(OBJECT_PATH).withColumn(
             "VendorID", col("VendorID").cast(LongType()))
@@ -47,22 +46,18 @@ def etl_source_to_bronze(spark_session, df_source, TARGET_TABLE):
     spark_session.stop()
 
 
-async def main(year, TARGET_TABLE):
-    # Tight coupling
+async def main(year, TARGET_TABLE,  MINIO_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD):
+
     APP_NAME = 'parquet_to_bronze'
     CATALOG_NAME = 'iceberg'
     DB_NAME = 'default'
-    # TODO: add env instead
-    MINIO_URL = os.getenv("MINIO_URL")
-    MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
-    MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
-    minio_client = MinIOWrapper(
+    minioWrapper = MinIOWrapper(
         MINIO_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD)
 
     sparkWrapper = SparkWrapper(
         APP_NAME, CATALOG_NAME, DB_NAME)
 
-    file_names = minio_client.get_downloaded_files_by_year("lake", year)
+    file_names = minioWrapper.get_downloaded_files_by_year("lake", year)
 
     for file_name in file_names:
 
@@ -74,6 +69,9 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--SRC_TABLE", required=True)
     parser.add_argument("--TARGET_TABLE", required=True)
+    parser.add_argument("--MINIO_URL", required=True)
+    parser.add_argument("--MINIO_ROOT_USER", required=True)
+    parser.add_argument("--MINIO_ROOT_PASSWORD", required=True)
 
     args = parser.parse_args()
     return args
@@ -85,7 +83,10 @@ if __name__ == "__main__":
     try:
         asyncio.run(main(
             args.SRC_TABLE,
-            args.TARGET_TABLE
+            args.TARGET_TABLE,
+            args.MINIO_URL,
+            args.MINIO_ROOT_USER,
+            args.MINIO_ROOT_PASSWORD
         ))
     except Exception as e:
         print(e, file=sys.stderr)
