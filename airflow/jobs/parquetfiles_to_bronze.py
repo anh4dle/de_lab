@@ -2,12 +2,11 @@ from pyspark.sql.functions import col
 import asyncio
 import asyncio
 import pytz
-import os
 from utils.spark_wrapper import SparkWrapper
-
 from utils.logger import logger
 import argparse
-from pyspark.sql.types import *
+from pyspark.sql.types import LongType
+
 from utils.minio_utils import MinIOWrapper
 
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
