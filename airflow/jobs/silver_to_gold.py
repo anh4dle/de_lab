@@ -1,6 +1,7 @@
 import asyncio
 from utils.spark_wrapper import SparkWrapper
 from utils.logger import logger
+from utils.data_validator import DataValidator
 import argparse
 
 
@@ -18,6 +19,7 @@ def silver_to_gold(spark, SRC_TABLE, TARGET_TABLE):
         """
         df_source = spark.sql(query)
         df_source.show(10)
+
         df_source.createOrReplaceTempView('SOURCE_TABLE')
 
         update_cols = ', '.join(

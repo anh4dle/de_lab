@@ -2,7 +2,7 @@ import asyncio
 import argparse
 import asyncio
 from utils.spark_wrapper import SparkWrapper
-from utils.config_loader import ConfigLoader
+
 from utils.logger import logger
 from pyspark.sql.functions import sha2, concat_ws
 

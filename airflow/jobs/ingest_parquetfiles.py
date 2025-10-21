@@ -125,7 +125,7 @@ async def submit_download_and_upload(minio_url, minio_access, minio_pass, bucket
     last_dash = download_url.rfind("/")
     filename = download_url[last_dash + 1:]
     if not check_if_uploaded(trino_conn, filename):
-        # Use context manager to manage resource lifecycle automatically and client session to reuse the established TCP connection
+        # Use context manager to manage resource lifecycle automatically and client session to reuse the TCP connection
         async with aiohttp.ClientSession() as aiohttp_session:
             # Wrap coroutines in tasks
             tasks = [download_and_upload(trino_conn, minio, bucket_name, aiohttp_session, dir_path, url, retry_times)

@@ -18,22 +18,19 @@ def get_trino_client():
             f"Failed to connect to trino because {e}")
 
 
-def check_if_uploaded(trino_conn, fileName):
+def check_if_uploaded(trino_conn, fileName) -> bool:
+    uploaded = True
     try:
         sql_statement = f"SELECT count(*) FROM iceberg.default.log_table WHERE filename = '{fileName}' AND status = 'failed'"
         cur = trino_conn.cursor()
         cur.execute(sql_statement)
         rows = cur.fetchall()[0][0]
-
         if rows == 0:
-            # print("File not uploaded", fileName)
             logger.error(f"File not uploaded {fileName}")
-            return False
+            uploaded = False
     except Exception as e:
-        # print("Error checking if uploaded", e)
         logger.error(f"Error checking if uploaded {e}")
-
-        return True
+    return uploaded
 
 
 def log_status(trino_conn, fileName, download_url, status, timestamp, error):
