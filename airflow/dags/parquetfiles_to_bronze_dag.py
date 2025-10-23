@@ -55,7 +55,8 @@ with DAG(
                 "--TARGET_TABLE", Variable.get("BRONZE_TABLE"),
                 "--MINIO_URL", MINIO_URL,
                 "--MINIO_ROOT_USER", MINIO_ROOT_USER,
-                "--MINIO_ROOT_PASSWORD", MINIO_ROOT_PASSWORD
+                "--MINIO_ROOT_PASSWORD", MINIO_ROOT_PASSWORD,
+                "--batchNumber"
             ],
             conf=spark_config,
             **SPARK_DRIVER_CONFIG

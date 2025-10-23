@@ -9,9 +9,13 @@ from pyspark.sql.functions import sha2, concat_ws
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 
 
-def transform(spark, SRC_TABLE):
+def extract_batch(spark, SRC_TABLE, batch_id):
+    df_source = spark.read.table(SRC_TABLE)
+
+
+def transform(df_source):
     try:
-        df_source = spark.read.table(SRC_TABLE)
+        # df_source = spark.read.table(SRC_TABLE)
         df_source = df_source.withColumnRenamed("tpep_pickup_datetime",
                                                 "pickup_datetime").withColumnRenamed("tpep_dropoff_datetime",
                                                                                      "dropoff_datetime")
@@ -63,7 +67,11 @@ def load(spark, df_source, TARGET_TABLE):
         """
         spark.sql(SQL)
     except Exception as e:
-        logger.error(f"logging exception err: {str(e)}")
+        logger.error(f"Error in batch {batch_id}: {str(e)}")
+
+        # log batch for replay
+        spark.createDataFrame([(batch_id, str(e))], ["batch_id", "error"]) \
+             .write.mode("append").parquet("s3://errors/replay_log/")
         raise
 
 
@@ -84,11 +92,13 @@ async def main(SRC_TABLE, TARGET_TABLE):
 
     sparkWrapper = SparkWrapper(
         APP_NAME, CATALOG_NAME, DB_NAME)
-    spark_session = sparkWrapper.spark
-    transformed_df = transform(spark_session, SRC_TABLE)
-    load(spark_session, transformed_df, TARGET_TABLE)
+    spark = sparkWrapper.spark
+    df_source = extract_batch(spark, SRC_TABLE)
 
-    spark_session.stop()
+    transformed_df = transform(spark, df_source)
+    load(spark, transformed_df, TARGET_TABLE)
+
+    spark.stop()
 
 
 if __name__ == "__main__":
