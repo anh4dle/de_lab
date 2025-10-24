@@ -9,13 +9,19 @@ from pyspark.sql.functions import sha2, concat_ws
 # base_url = "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
 
 
+"""
+Read data from bronze table to ingest to silver
+"""
+
+
 def extract_batch(spark, SRC_TABLE, batch_id):
     df_source = spark.read.table(SRC_TABLE)
+    return df_source
 
 
 def transform(df_source):
     try:
-        # df_source = spark.read.table(SRC_TABLE)
+
         df_source = df_source.withColumnRenamed("tpep_pickup_datetime",
                                                 "pickup_datetime").withColumnRenamed("tpep_dropoff_datetime",
                                                                                      "dropoff_datetime")

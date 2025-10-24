@@ -50,5 +50,4 @@ with DAG(
         outlets=[silver_table],
         conf=spark_config,
         **SPARK_DRIVER_ONFIG
-
     )

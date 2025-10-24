@@ -12,6 +12,11 @@ from utils.minio_utils import MinIOWrapper
 tz = pytz.timezone("Asia/Ho_Chi_Minh")
 
 
+"""
+Each file will be passed to this function and return a df contain the data of that file
+"""
+
+
 def read_parquet(spark_session, OBJECT_PATH):
     try:
         df_source = spark_session.read.parquet(OBJECT_PATH).withColumn(
@@ -42,7 +47,7 @@ def etl_source_to_bronze(spark_session, df_source, TARGET_TABLE):
         spark_session.sql(SQL)
     except Exception as e:
         logger.error(f"logging exception err: {e}")
-    spark_session.stop()
+        # TODO: log failed month
 
 
 async def main(year, TARGET_TABLE,  MINIO_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD):
@@ -53,15 +58,16 @@ async def main(year, TARGET_TABLE,  MINIO_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSW
     minioWrapper = MinIOWrapper(
         MINIO_URL, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD)
 
-    sparkWrapper = SparkWrapper(
-        APP_NAME, CATALOG_NAME, DB_NAME)
+    spark = SparkWrapper(
+        APP_NAME, CATALOG_NAME, DB_NAME).spark
 
     file_names = minioWrapper.get_downloaded_files_by_year("lake", year)
 
+    # Go through each month data and ingest to bronze layer
     for file_name in file_names:
-
-        df = read_parquet(sparkWrapper.spark, f"s3a://lake/{file_name}")
-        etl_source_to_bronze(sparkWrapper.spark, df, TARGET_TABLE)
+        df = read_parquet(spark, f"s3a://lake/{file_name}")
+        etl_source_to_bronze(spark, df, TARGET_TABLE)
+    spark.stop()
 
 
 def parse_args():

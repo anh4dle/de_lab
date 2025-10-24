@@ -12,9 +12,13 @@ class MinIOWrapper:
             secure=False,
         )
 
+    """
+    Return all downloaded monthly data file for this year
+    """
+
     def get_downloaded_files_by_year(self, bucket, year):
         try:
-            # Ensure it's a string with a trailing slash
+
             prefix = f"parquetfiles/{year}/"
 
             objects = self.minio_client.list_objects(
