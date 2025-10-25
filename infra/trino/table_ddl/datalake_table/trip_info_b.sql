@@ -18,7 +18,10 @@ CREATE TABLE iceberg.default.trip_info_b (
     tolls_amount DOUBLE,
     improvement_surcharge DOUBLE,
     total_amount DOUBLE,
-    congestion_surcharge DOUBLE)
+    congestion_surcharge DOUBLE,
+batch_id VARCHAR,
+updated_date TIMESTAMP(0),
+ingested_date TIMESTAMP(0))
 WITH (
 	location = 's3a://lake/bronze/',
     format = 'PARQUET'

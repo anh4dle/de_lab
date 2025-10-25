@@ -9,7 +9,10 @@ CREATE TABLE iceberg.default.trip_info_s (
     DOLocationID INT,
     payment_type INT,
     total_amount DOUBLE,
-    trip_id VARCHAR
+    trip_id VARCHAR,
+batch_id VARCHAR,
+updated_date TIMESTAMP(0),
+ingested_date TIMESTAMP(0)
 )
 WITH (
 	location = 's3a://lake/silver/'

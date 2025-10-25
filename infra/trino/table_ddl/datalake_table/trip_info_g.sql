@@ -4,7 +4,10 @@ CREATE TABLE iceberg.default.trip_info_g (
     year INT,
     month INT,
     day INT,
-    total_revenue DOUBLE
+    total_revenue DOUBLE,
+batch_id VARCHAR,
+updated_date TIMESTAMP(0),
+ingested_date TIMESTAMP(0)
 )
 WITH (
     location = 's3a://lake/gold/',
